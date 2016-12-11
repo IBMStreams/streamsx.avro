@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<toolkitModel xmlns="http://www.ibm.com/xmlns/prod/streams/spl/toolkit" productVersion="4.2.0.0" xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common" xmlns:ti="http://www.ibm.com/xmlns/prod/streams/spl/toolkitInfo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <toolkit name="com.ibm.streamsx.avro" requiredProductVersion="4.2.0.0" version="1.0.0">
+    <description>This toolkit provides SerDes for Apache Avro</description>
+    <uriTable>
+      <uri index="1" value="com.ibm.streamsx.avro/AvroToJSON"/>
+      <uri index="2" value="com.ibm.streamsx.avro/AvroToJSON/AvroToJSON_16x16.png"/>
+      <uri index="3" value="com.ibm.streamsx.avro/AvroToJSON/AvroToJSON_32x32.png"/>
+    </uriTable>
+    <namespace name="com.ibm.streamsx.avro">
+      <primitiveOp language="Java" modelUriIndex="1" name="AvroToJSON" public="true">
+        <description>This operator binary Avro messages into a JSON string. If an invalid Avro message is found in the input, the operator will fail.</description>
+        <images>
+          <image size="16" uriIndex="2"/>
+          <image size="32" uriIndex="3"/>
+        </images>
+        <parameter expressionMode="Constant" name="vmArg" optional="true" type="rstring">
+          <description>
+Specifies command-line arguments that are passed to the Java virtual machine that the operator runs within.
+</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="avroSchemaFile" optional="false" type="rstring">
+          <description>File that contains the Avro schema to deserialize the binary message.</description>
+        </parameter>
+        <inputPort maxNumPorts="1" minNumPorts="1" optional="false" windowPunctInputMode="Oblivious">
+          <description>Port that ingests tuples</description>
+          <windowPolicy>NonWindowed</windowPolicy>
+        </inputPort>
+        <outputPort expressionMode="Nonexistent" maxNumPorts="1" minNumPorts="1" optional="false" windowPunctOutputMode="Generating">
+          <description>Port that produces tuples</description>
+        </outputPort>
+      </primitiveOp>
+    </namespace>
+    <sabFiles>
+      <ti:include path="toolkit.xml" root="toolkitDir"/>
+      <ti:include path="impl/java/lib/**" root="toolkitDir"/>
+      <ti:include path="impl/java/bin/**" root="toolkitDir"/>
+      <ti:include path="impl/bin/**" root="toolkitDir"/>
+      <ti:include path="impl/lib/**" root="toolkitDir"/>
+      <ti:include path="impl/nl/*.dat" root="toolkitDir"/>
+      <ti:include path="etc/**" root="toolkitDir"/>
+      <ti:include path="lib/**" root="toolkitDir"/>
+      <ti:include path="nl/**" root="toolkitDir"/>
+      <ti:include path="opt/**" root="toolkitDir"/>
+    </sabFiles>
+  </toolkit>
+
+</toolkitModel>

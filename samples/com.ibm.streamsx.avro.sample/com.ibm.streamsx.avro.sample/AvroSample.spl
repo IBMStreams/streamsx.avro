@@ -43,6 +43,7 @@ composite AvroSample
 		{
 			param
 				avroSchemaFile : dataDirectory() + "/twitter.avsc" ;
+				
 		}
 
 		/* Display the retrieved JSON message */

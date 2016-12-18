@@ -17,25 +17,25 @@ public class TestJSONToAvro {
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String tupleType_AvroBlob = "tuple<blob avroBlob>";
-		String jsonString = "tuple<rstring jsonString>";
+		String avroBlobT = "tuple<blob avroBlob, uint64 timeStamp>";
+		String jsonStringT = "tuple<rstring jsonString, uint64 timeStamp>";
 
 		OperatorGraph graph = OperatorGraphFactory.newGraph();
 
 		OperatorInvocation<JSONBeacon> jsonBeaconOp = graph.addOperator(JSONBeacon.class);
-		OutputPortDeclaration jsonBeaconOut = jsonBeaconOp.addOutput(jsonString);
+		OutputPortDeclaration jsonBeaconOut = jsonBeaconOp.addOutput(jsonStringT);
 
 		// Declare a JSONToAvro operator
 		OperatorInvocation<JSONToAvro> jsonToAvroOp = graph.addOperator(JSONToAvro.class);
 		jsonToAvroOp.setStringParameter("avroSchemaFile", "data/twitter.avsc");
 		jsonToAvroOp.addInput(jsonBeaconOut);
-		OutputPortDeclaration jsonToAvroOut = jsonToAvroOp.addOutput(tupleType_AvroBlob);
+		OutputPortDeclaration jsonToAvroOut = jsonToAvroOp.addOutput(avroBlobT);
 
 		// Use the output of the JSONToAvro to convert back to JSON
 		OperatorInvocation<AvroToJSON> avroToJSONOp = graph.addOperator(AvroToJSON.class);
 		avroToJSONOp.setStringParameter("avroSchemaFile", "data/twitter.avsc");
 		avroToJSONOp.addInput(jsonToAvroOut);
-		OutputPortDeclaration avroToJsonOut = avroToJSONOp.addOutput(jsonString);
+		OutputPortDeclaration avroToJsonOut = avroToJSONOp.addOutput(jsonStringT);
 
 		// Declare the Display operator to display to stdout
 		OperatorInvocation<Display> display = graph.addOperator(Display.class);
@@ -50,7 +50,7 @@ public class TestJSONToAvro {
 		// Future<JavaTestableGraph> future = null;
 		try {
 			executableGraph = tester.executable(graph);
-			executableGraph.setTraceLevel(TraceLevel.TRACE);
+			executableGraph.setTraceLevel(TraceLevel.INFO);
 			executableGraph.executeToCompletion();
 		} catch (Exception e) {
 			e.printStackTrace();

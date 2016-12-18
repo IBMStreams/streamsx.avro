@@ -80,15 +80,6 @@ public class JSONBeacon extends ProcessTupleProducer {
 	}
 
 	/**
-	 * Check the output attributes name and value are present.
-	 */
-	@ContextCheck
-	public static void checkOuputAttributes(OperatorContextChecker checker) {
-		OperatorContext context = checker.getOperatorContext();
-		checker.checkRequiredAttributes(context.getStreamingOutputs().get(0), "jsonString");
-	}
-
-	/**
 	 * Set the tagged parameter.
 	 * 
 	 * @param tagged
@@ -119,12 +110,14 @@ public class JSONBeacon extends ProcessTupleProducer {
 		for (int i = 0; i < 100; i++) {
 			json.put("username", "Frank");
 			json.put("tweet", "This JSON message also rocks: " + i);
-			json.put("timestamp", new Long(1048298240L + 1));
+			json.put("timestamp", new Long(1048298240L + i));
 
 			/* Now submit tuple */
 			OutputTuple tuple = out.newTuple();
 			String jsonString = json.serialize();
+			long timeStamp = System.currentTimeMillis();
 			tuple.setString(0, jsonString);
+			tuple.setLong(1, timeStamp);
 			out.submit(tuple);
 		}
 

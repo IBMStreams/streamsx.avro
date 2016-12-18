@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
 <toolkitModel xmlns="http://www.ibm.com/xmlns/prod/streams/spl/toolkit" productVersion="4.2.0.0" xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common" xmlns:ti="http://www.ibm.com/xmlns/prod/streams/spl/toolkitInfo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-  <toolkit name="com.ibm.streamsx.avro" requiredProductVersion="4.2.0.0" version="1.0.0">
+  <toolkit name="com.ibm.streamsx.avro" requiredProductVersion="4.2.0.0" version="1.0.1">
     <description>This toolkit provides SerDes for Apache Avro</description>
     <uriTable>
       <uri index="1" value="com.ibm.streamsx.avro/AvroToJSON"/>
@@ -26,6 +26,12 @@ Specifies command-line arguments that are passed to the Java virtual machine tha
         <parameter cardinality="1" expressionMode="AttributeFree" name="avroSchemaFile" optional="false" type="rstring">
           <description>File that contains the Avro schema to deserialize the binary message.</description>
         </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="inputAvroAttribute" optional="true" type="rstring">
+          <description>The input stream attribute which contains the output Avro blob. This attribute must be of type blob. Default is the sole output attribute when the schema has one attribute otherwise `avroBlob`.</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="outputJsonAttribute" optional="true" type="rstring">
+          <description>The output stream attribute which contains the output JSON string. This attribute must be of `rstring` or `ustring` type. Default is the sole input attribute when the schema has one attribute otherwise `jsonString`.</description>
+        </parameter>
         <inputPort maxNumPorts="1" minNumPorts="1" optional="false" windowPunctInputMode="Oblivious">
           <description>Port that ingests tuples</description>
           <windowPolicy>NonWindowed</windowPolicy>
@@ -47,6 +53,12 @@ Specifies command-line arguments that are passed to the Java virtual machine tha
         </parameter>
         <parameter cardinality="1" expressionMode="AttributeFree" name="avroSchemaFile" optional="false" type="rstring">
           <description>File that contains the Avro schema to serialize the binary message.</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="inputJsonAttribute" optional="true" type="rstring">
+          <description>The input stream attribute which contains the input JSON string. This attribute must be of `rstring` or `ustring` type. Default is the sole input attribute when the schema has one attribute otherwise `jsonString`.</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="outputAvroAttribute" optional="true" type="rstring">
+          <description>The ouput stream attribute which contains the output Avro blob. This attribute must be of type blob. Default is the sole output attribute when the schema has one attribute otherwise `avroBlob`.</description>
         </parameter>
         <inputPort maxNumPorts="1" minNumPorts="1" optional="false" windowPunctInputMode="Oblivious">
           <description>Port that ingests JSON records</description>

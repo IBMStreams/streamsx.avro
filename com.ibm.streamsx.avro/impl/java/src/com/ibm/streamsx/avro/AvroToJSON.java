@@ -140,6 +140,7 @@ public class AvroToJSON extends AbstractOperator {
 		// Create a new tuple for output port 0
 		StreamingOutput<OutputTuple> outStream = getOutput(0);
 		OutputTuple outTuple = outStream.newTuple();
+		outTuple.assign(tuple);
 
 		// Get the incoming binary Avro record(s)
 		Blob avroMessage = tuple.getBlob(inputAvroAttribute);

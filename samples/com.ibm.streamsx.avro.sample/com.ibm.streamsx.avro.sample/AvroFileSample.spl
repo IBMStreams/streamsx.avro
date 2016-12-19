@@ -1,0 +1,34 @@
+namespace com.ibm.streamsx.avro.sample ;
+
+use com.ibm.streamsx.avro::* ;
+use com.ibm.streamsx.json::* ;
+
+composite AvroFileSample
+{
+	graph
+	// Read the entire .avro file
+		stream<blob avroBlob> ReadFile = FileSource()
+		{
+			param
+				file : dataDirectory() + "/twitter.avro" ;
+				format : block ;
+				blockSize : 3000u ;
+		}
+
+		/* Convert the blob to JSON */
+		stream<rstring jsonString> ConvertAvroToJson = AvroToJSON(ReadFile)
+		{
+			param
+				avroSchemaEmbedded : true ;
+		}
+
+		/* Display the retrieved JSON message */
+		() as DisplayJson = FileSink(ConvertAvroToJson)
+		{
+			param
+				file : "/dev/stdout" ;
+				flush : 1u ;
+				quoteStrings : false ;
+		}
+
+}

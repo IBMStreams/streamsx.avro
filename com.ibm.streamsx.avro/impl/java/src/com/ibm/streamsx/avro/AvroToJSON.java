@@ -12,8 +12,10 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 
 import org.apache.avro.Schema;
+import org.apache.avro.file.DataFileStream;
 import org.apache.avro.generic.GenericDatumReader;
 import org.apache.avro.generic.GenericRecord;
+import org.apache.avro.io.DatumReader;
 import org.apache.avro.io.Decoder;
 import org.apache.avro.io.DecoderFactory;
 import org.apache.log4j.Logger;
@@ -61,9 +63,10 @@ public class AvroToJSON extends AbstractOperator {
 	private final String DEFAULT_OUTPUT_JSON_ATTRIBUTE = "jsonString";
 
 	protected String avroSchemaFile = "";
+	protected boolean avroSchemaEmbedded = false;
 	Schema schema;
 
-	@Parameter(optional = true, description = "The input stream attribute which contains the output Avro blob. This attribute must be of type blob. Default is the sole output attribute when the schema has one attribute otherwise `avroBlob`.")
+	@Parameter(optional = true, description = "The input stream attribute which contains the input Avro blob. This attribute must be of type blob. Default is the sole output attribute when the schema has one attribute otherwise `avroBlob`.")
 	public void setInputAvroAttribute(String inputAvroAttribute) {
 		this.inputAvroAttribute = inputAvroAttribute;
 	}
@@ -73,13 +76,14 @@ public class AvroToJSON extends AbstractOperator {
 		this.outputJsonAttribute = outputJsonAttribute;
 	}
 
-	@Parameter(name = "avroSchemaFile", optional = false, description = "File that contains the Avro schema to deserialize the binary message.")
+	@Parameter(optional = true, description = "File that contains the Avro schema to deserialize the binary message.")
 	public void setAvroSchemaFile(String avroSchemaFile) {
 		this.avroSchemaFile = avroSchemaFile;
 	}
 
-	public String getAvroSchemaFile() {
-		return avroSchemaFile;
+	@Parameter(optional = true, description = "Is the Avro schema embedded in the input Avro blob?")
+	public void setAvroSchemaEmbedded(boolean avroSchemaEmbedded) {
+		this.avroSchemaEmbedded = avroSchemaEmbedded;
 	}
 
 	/**
@@ -121,10 +125,16 @@ public class AvroToJSON extends AbstractOperator {
 		LOGGER.log(TraceLevel.TRACE, "Output JSON attribute: " + outputJsonAttribute);
 
 		// Get the Avro schema file to parse the Avro messages
-		LOGGER.log(TraceLevel.TRACE, "Retrieving and parsing Avro schema file " + getAvroSchemaFile());
-		InputStream avscInput = new FileInputStream(getAvroSchemaFile());
-		Schema.Parser parser = new Schema.Parser();
-		schema = parser.parse(avscInput);
+		if (!avroSchemaFile.isEmpty()) {
+			LOGGER.log(TraceLevel.TRACE, "Retrieving and parsing Avro schema file " + avroSchemaFile);
+			InputStream avscInput = new FileInputStream(avroSchemaFile);
+			Schema.Parser parser = new Schema.Parser();
+			schema = parser.parse(avscInput);
+		}
+
+		// If the schema is embedded, the schema file must not be specified
+		if (avroSchemaEmbedded && !avroSchemaFile.isEmpty())
+			throw new Exception("Parameter avroSchema cannot be specified if the schema is embedded in the message.");
 
 		LOGGER.log(TraceLevel.TRACE, "AvroToJSON operator initialized, ready to receive tuples");
 
@@ -147,17 +157,70 @@ public class AvroToJSON extends AbstractOperator {
 		if (LOGGER.isTraceEnabled())
 			LOGGER.log(TraceLevel.TRACE, "Processing Avro message with length " + avroMessage.getLength());
 
-		// Convert the BLOB to GenericRecord object
+		// Submit JSON tuples based on the Avro content received in the Blob
+		if (!avroSchemaEmbedded) {
+			processAvroMessage(avroMessage, outStream, outTuple, schema);
+		} else {
+			processAvroMessage(avroMessage, outStream, outTuple);
+		}
+	}
+
+	/**
+	 * Processes an Avro Blob containing a single message and with no embedded
+	 * schema. This is the pattern when Avro objects are passed over messaging
+	 * infrastructure such as Apache Kafka.
+	 * 
+	 * @param avroMessage
+	 *            The Blob that holds the single Avro object
+	 * @param outStream
+	 *            The stream to which the JSON string must be submitted
+	 * @param outTuple
+	 *            The tuple holding the JSON string
+	 * @param schema
+	 *            The schema of the Avro object
+	 * @throws Exception
+	 */
+	private void processAvroMessage(Blob avroMessage, StreamingOutput<OutputTuple> outStream, OutputTuple outTuple,
+			Schema schema) throws Exception {
 		GenericDatumReader<GenericRecord> consumer = new GenericDatumReader<GenericRecord>(schema);
 		ByteArrayInputStream consumedByteArray = new ByteArrayInputStream(avroMessage.getData());
 		Decoder consumedDecoder = DecoderFactory.get().binaryDecoder(consumedByteArray, null);
 		GenericRecord consumedDatum = consumer.read(null, consumedDecoder);
 		if (LOGGER.isTraceEnabled())
 			LOGGER.log(TraceLevel.TRACE, "JSON representation of Avro message: " + consumedDatum.toString());
-
 		// Submit new tuple to output port 0
 		outTuple.setString(outputJsonAttribute, consumedDatum.toString());
 		outStream.submit(outTuple);
+	}
+
+	/**
+	 * Processes a blob which contains one or more Avro objects and has the
+	 * schema embedded. This is the pattern when Avro objects are read from a
+	 * file (either local file system or HDFS). Every Avro object in the blob is
+	 * converted to JSON and then submitted to the output port.
+	 * 
+	 * @param avroMessage
+	 *            The Blob that holds one or more Avro objects and the schema
+	 * @param outStream
+	 *            The stream to which the JSON string must be submitted
+	 * @param outTuple
+	 *            The tuple holding the JSON string
+	 * @throws Exception
+	 */
+	private void processAvroMessage(Blob avroMessage, StreamingOutput<OutputTuple> outStream, OutputTuple outTuple)
+			throws Exception {
+		ByteArrayInputStream is = new ByteArrayInputStream(avroMessage.getData());
+		DatumReader<GenericRecord> reader = new GenericDatumReader<GenericRecord>();
+		DataFileStream<GenericRecord> dataFileReader = new DataFileStream<GenericRecord>(is, reader);
+		GenericRecord consumedDatum = null;
+		while (dataFileReader.hasNext()) {
+			consumedDatum = dataFileReader.next(consumedDatum);
+			// Submit new tuple to output port 0
+			outTuple.setString(outputJsonAttribute, consumedDatum.toString());
+			outStream.submit(outTuple);
+		}
+		is.close();
+		dataFileReader.close();
 	}
 
 	static final String DESC = "This operator binary Avro messages into a JSON string."

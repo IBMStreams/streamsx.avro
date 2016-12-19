@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<toolkitModel xmlns="http://www.ibm.com/xmlns/prod/streams/spl/toolkit" productVersion="4.2.0.0" xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common" xmlns:ti="http://www.ibm.com/xmlns/prod/streams/spl/toolkitInfo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<toolkitModel xmlns="http://www.ibm.com/xmlns/prod/streams/spl/toolkit" productVersion="4.2.0.1" xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common" xmlns:ti="http://www.ibm.com/xmlns/prod/streams/spl/toolkitInfo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
   <toolkit name="com.ibm.streamsx.avro.sample" requiredProductVersion="4.2.0.0" version="1.0.0">
     <description/>
     <uriTable>
-      <uri index="1" value="com.ibm.streamsx.avro.sample/AvroSample.spl"/>
+      <uri index="1" value="com.ibm.streamsx.avro.sample/AvroFileSample.spl"/>
+      <uri index="2" value="com.ibm.streamsx.avro.sample/AvroSample.spl"/>
     </uriTable>
     <namespace name="com.ibm.streamsx.avro.sample">
-      <compositeOp column="11" line="6" name="AvroSample" potentialMain="true" uriIndex="1">
-        <type column="3" line="9" name="tweetT" type="rstring username, rstring tweet, uint64 tweettime" uriIndex="1"/>
+      <compositeOp column="11" line="6" name="AvroFileSample" potentialMain="true" uriIndex="1"/>
+      <compositeOp column="11" line="6" name="AvroSample" potentialMain="true" uriIndex="2">
+        <type column="3" line="9" name="tweetT" type="rstring username, rstring tweet, uint64 tweettime" uriIndex="2"/>
       </compositeOp>
     </namespace>
     <dependency>

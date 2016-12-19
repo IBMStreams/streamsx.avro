@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<toolkitModel xmlns="http://www.ibm.com/xmlns/prod/streams/spl/toolkit" productVersion="4.2.0.0" xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common" xmlns:ti="http://www.ibm.com/xmlns/prod/streams/spl/toolkitInfo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<toolkitModel xmlns="http://www.ibm.com/xmlns/prod/streams/spl/toolkit" productVersion="4.2.0.1" xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common" xmlns:ti="http://www.ibm.com/xmlns/prod/streams/spl/toolkitInfo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
   <toolkit name="com.ibm.streamsx.avro.test" requiredProductVersion="4.2.0.0" version="1.0.0">
     <description/>
@@ -7,6 +7,7 @@
       <uri index="1" value="com.ibm.streamsx.avro.test/Display"/>
       <uri index="3" value="com.ibm.streamsx.avro.test/AvroBeacon"/>
       <uri index="2" value="com.ibm.streamsx.avro.test/JSONBeacon"/>
+      <uri index="4" value="com.ibm.streamsx.avro.test/AvroFileSource"/>
     </uriTable>
     <namespace name="com.ibm.streamsx.avro.test">
       <primitiveOp language="Java" modelUriIndex="1" name="Display" public="true">
@@ -47,6 +48,26 @@ Specifies command-line arguments that are passed to the Java virtual machine tha
       </primitiveOp>
       <primitiveOp language="Java" modelUriIndex="3" name="AvroBeacon" public="true">
         <description>Produces Avro messages and submits BLOB tuples</description>
+        <parameter expressionMode="Constant" name="vmArg" optional="true" type="rstring">
+          <description>
+Specifies command-line arguments that are passed to the Java virtual machine that the operator runs within.
+</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="initDelay" optional="true" type="int64">
+          <description>Delay in seconds before the operator starts producing tuples.</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="tagged" optional="true" type="rstring">
+          <description>Prefix for property names to be tagged with the value of `tags`.</description>
+        </parameter>
+        <parameter cardinality="-1" expressionMode="AttributeFree" name="tags" optional="true" type="rstring">
+          <description>Tags to set in `tags` output attribute when the property name starts with the value of `taggged`.</description>
+        </parameter>
+        <outputPort expressionMode="Nonexistent" maxNumPorts="1" minNumPorts="1" optional="false" windowPunctOutputMode="Generating">
+          <description>Port requiring `name` and `value` attributes representing a system property. Optional `tags` attribute containing tags for the property</description>
+        </outputPort>
+      </primitiveOp>
+      <primitiveOp language="Java" modelUriIndex="4" name="AvroFileSource" public="true">
+        <description>Reads an Avro file with embedded schema and submits a BLOB tupple</description>
         <parameter expressionMode="Constant" name="vmArg" optional="true" type="rstring">
           <description>
 Specifies command-line arguments that are passed to the Java virtual machine that the operator runs within.

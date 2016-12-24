@@ -19,7 +19,7 @@ composite AvroSample
 		}
 
 		/* Convert the Tweet tuple to a JSON string */
-		stream<rstring jsonString> ConvertTupleToJson = TupleToJSON(GenerateTweet)
+		stream<rstring jsonMessage> ConvertTupleToJson = TupleToJSON(GenerateTweet)
 		{
 		}
 
@@ -27,7 +27,7 @@ composite AvroSample
 		stream<blob avroMessage> ConvertToAvro = JSONToAvro(ConvertTupleToJson)
 		{
 			param
-				avroSchemaFile : dataDirectory() + "/twitter.avsc" ;
+				avroMessageSchemaFile : dataDirectory() + "/twitter.avsc" ;
 		}
 
 		/* Display the Avro message */
@@ -39,10 +39,10 @@ composite AvroSample
 		}
 
 		/* Convert the Avro message to a JSON string */
-		stream<rstring jsonString> ConvertToJson = AvroToJSON(ConvertToAvro)
+		stream<rstring jsonMessage> ConvertToJson = AvroToJSON(ConvertToAvro)
 		{
 			param
-				avroSchemaFile : dataDirectory() + "/twitter.avsc" ;
+				avroMessageSchemaFile : dataDirectory() + "/twitter.avsc" ;
 		}
 
 		/* Display the retrieved JSON message */

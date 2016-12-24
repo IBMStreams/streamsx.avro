@@ -3,7 +3,7 @@
   <info:identity>
     <info:name>com.ibm.streamsx.avro</info:name>
     <info:description>This toolkit provides SerDes for Apache Avro</info:description>
-    <info:version>1.0.2</info:version>
+    <info:version>1.0.3</info:version>
     <info:requiredProductVersion>4.2.0.0</info:requiredProductVersion>
   </info:identity>
   <info:dependencies/>

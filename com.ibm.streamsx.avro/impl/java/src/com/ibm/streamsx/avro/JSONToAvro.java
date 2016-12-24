@@ -61,27 +61,27 @@ public class JSONToAvro extends AbstractOperator {
 
 	private static Logger LOGGER = Logger.getLogger(JSONToAvro.class);
 
-	private String inputJsonAttribute = null;
-	private final String DEFAULT_INPUT_JSON_ATTRIBUTE = "jsonString";
-	private String outputAvroAttribute = null;
-	private final String DEFAULT_OUTPUT_AVRO_ATTRIBUTE = "avroBlob";
+	private String inputJsonMessage = null;
+	private final String DEFAULT_INPUT_JSON_MSG_ATTRIBUTE = "jsonMessage";
+	private String outputAvroMessage = null;
+	private final String DEFAULT_OUTPUT_AVRO_MSG_ATTRIBUTE = "avroMessage";
 
-	private String avroSchemaFile = null;
-	private Schema schema;
+	private String avroMessageSchemaFile = null;
+	private Schema messageSchema;
 
-	@Parameter(optional = true, description = "The input stream attribute which contains the input JSON string. This attribute must be of `rstring` or `ustring` type. Default is the sole input attribute when the schema has one attribute otherwise `jsonString`.")
-	public void setInputJsonAttribute(String inputJsonAttribute) {
-		this.inputJsonAttribute = inputJsonAttribute;
+	@Parameter(optional = true, description = "The input stream attribute which contains the input JSON message Fstring. This attribute must be of `rstring` or `ustring` type. Default is the sole input attribute when the schema has one attribute otherwise `jsonMessage`.")
+	public void setInputJsonMessage(String inputJsonMessage) {
+		this.inputJsonMessage = inputJsonMessage;
 	}
 
-	@Parameter(optional = true, description = "The ouput stream attribute which contains the output Avro blob. This attribute must be of type blob. Default is the sole output attribute when the schema has one attribute otherwise `avroBlob`.")
-	public void setOutputAvroAttribute(String outputAvroAttribute) {
-		this.outputAvroAttribute = outputAvroAttribute;
+	@Parameter(optional = true, description = "The ouput stream attribute which contains the output Avro message. This attribute must be of type blob. Default is the sole output attribute when the schema has one attribute otherwise `avroMessage`.")
+	public void setOutputAvroMessage(String outputAvroMessage) {
+		this.outputAvroMessage = outputAvroMessage;
 	}
 
 	@Parameter(optional = false, description = "File that contains the Avro schema to serialize the binary message.")
-	public void setAvroSchemaFile(String avroSchemaFile) {
-		this.avroSchemaFile = avroSchemaFile;
+	public void setAvroMessageSchemaFile(String avroMessageSchemaFile) {
+		this.avroMessageSchemaFile = avroMessageSchemaFile;
 	}
 
 	/**
@@ -103,30 +103,30 @@ public class JSONToAvro extends AbstractOperator {
 		StreamSchema ssIp0 = getInput(0).getStreamSchema();
 
 		// If no input JSON attribute specified, use default
-		if (inputJsonAttribute == null) {
+		if (inputJsonMessage == null) {
 			if (ssIp0.getAttributeCount() == 1) {
-				inputJsonAttribute = ssIp0.getAttribute(0).getName();
+				inputJsonMessage = ssIp0.getAttribute(0).getName();
 			} else {
-				inputJsonAttribute = DEFAULT_INPUT_JSON_ATTRIBUTE;
+				inputJsonMessage = DEFAULT_INPUT_JSON_MSG_ATTRIBUTE;
 			}
 		}
-		LOGGER.log(TraceLevel.TRACE, "Input JSON attribute: " + inputJsonAttribute);
+		LOGGER.log(TraceLevel.TRACE, "Input JSON message attribute: " + inputJsonMessage);
 
-		// If no output Avro blob attribute specified, use default
-		if (outputAvroAttribute == null) {
+		// If no output Avro message attribute specified, use default
+		if (outputAvroMessage == null) {
 			if (ssOp0.getAttributeCount() == 1) {
-				outputAvroAttribute = ssOp0.getAttribute(0).getName();
+				outputAvroMessage = ssOp0.getAttribute(0).getName();
 			} else {
-				outputAvroAttribute = DEFAULT_OUTPUT_AVRO_ATTRIBUTE;
+				outputAvroMessage = DEFAULT_OUTPUT_AVRO_MSG_ATTRIBUTE;
 			}
 		}
-		LOGGER.log(TraceLevel.TRACE, "Output Avro attribute: " + outputAvroAttribute);
+		LOGGER.log(TraceLevel.TRACE, "Output Avro message attribute: " + outputAvroMessage);
 
 		// Get the Avro schema file to parse the Avro messages
-		LOGGER.log(TraceLevel.TRACE, "Retrieving and parsing Avro schema file " + avroSchemaFile);
-		InputStream avscInput = new FileInputStream(avroSchemaFile);
+		LOGGER.log(TraceLevel.TRACE, "Retrieving and parsing Avro message schema file " + avroMessageSchemaFile);
+		InputStream avscInput = new FileInputStream(avroMessageSchemaFile);
 		Schema.Parser parser = new Schema.Parser();
-		schema = parser.parse(avscInput);
+		messageSchema = parser.parse(avscInput);
 
 		LOGGER.log(TraceLevel.TRACE, "JSONToAvro operator initialized, ready to receive tuples");
 
@@ -139,7 +139,7 @@ public class JSONToAvro extends AbstractOperator {
 	@Override
 	public final void process(StreamingInput<Tuple> inputStream, Tuple tuple) throws Exception {
 
-		String jsonInput = tuple.getString(inputJsonAttribute);
+		String jsonInput = tuple.getString(inputJsonMessage);
 
 		if (LOGGER.isTraceEnabled())
 			LOGGER.log(TraceLevel.TRACE, "Input JSON string: " + jsonInput);
@@ -151,12 +151,12 @@ public class JSONToAvro extends AbstractOperator {
 		outTuple.assign(tuple);
 
 		// Convert the JSON string to a GenericRecord object
-		final GenericDatumReader<GenericRecord> datumReader = new GenericDatumReader<GenericRecord>(schema);
+		final GenericDatumReader<GenericRecord> datumReader = new GenericDatumReader<GenericRecord>(messageSchema);
 		ByteArrayInputStream jsonByteArray = new ByteArrayInputStream(jsonInput.getBytes(StandardCharsets.UTF_8));
 		ByteArrayOutputStream avroByteArray = new ByteArrayOutputStream();
 		DataInputStream jsonDis = new DataInputStream(jsonByteArray);
-		GenericDatumWriter<GenericRecord> avroWriter = new GenericDatumWriter<GenericRecord>(schema);
-		Decoder decoder = DecoderFactory.get().jsonDecoder(schema, jsonDis);
+		GenericDatumWriter<GenericRecord> avroWriter = new GenericDatumWriter<GenericRecord>(messageSchema);
+		Decoder decoder = DecoderFactory.get().jsonDecoder(messageSchema, jsonDis);
 		Encoder encoder = EncoderFactory.get().binaryEncoder(avroByteArray, null);
 		GenericRecord datum = datumReader.read(null, decoder);
 		avroWriter.write(datum, encoder);
@@ -166,11 +166,11 @@ public class JSONToAvro extends AbstractOperator {
 			LOGGER.log(TraceLevel.TRACE, "Length of generated Avro message: " + avroByteArray.size());
 
 		// Submit new tuple to output port 0
-		outTuple.setBlob(outputAvroAttribute, ValueFactory.newBlob(avroByteArray.toByteArray()));
+		outTuple.setBlob(outputAvroMessage, ValueFactory.newBlob(avroByteArray.toByteArray()));
 		outStream.submit(outTuple);
 	}
 
-	static final String DESC = "This operator binary Avro messages into a JSON string."
-			+ " If an invalid Avro message is found in the input, the operator will fail.";
+	static final String DESC = "This operator converts JSON strings into binary Avro messages."
+			+ " If an invalid JSON string is found in the input, the operator will fail.";
 
 }

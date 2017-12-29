@@ -1,0 +1,54 @@
+namespace com.ibm.streamsx.avro.sample ;
+
+use com.ibm.streamsx.avro::* ;
+use com.ibm.streamsx.json::* ;
+
+composite AvroToFileSample
+{
+	graph
+	/* 
+	 * Generate 100 tweets with a changing value for every tweet		
+		*/
+		stream<tweetT> GenerateTweet = Beacon()
+		{
+			param
+				iterations : 100u ;
+			output
+				GenerateTweet : username = "Frank", tweet = "Hi, this is a cool tweet! "
+					+(rstring) IterationCount(), tweettime = 1048298232ul + IterationCount() ;
+		}
+
+		/*
+		 * Convert the Tweet tuple to a JSON string		
+		*/
+		stream<rstring jsonMessage> ConvertTupleToJson = TupleToJSON(GenerateTweet)
+		{
+		}
+
+		/*
+		 * Batch the incoming tuples into Avro tuples with embedded
+		 * schema	
+		*/
+		stream<blob avroMessage> ConvertToAvro = JSONToAvro(ConvertTupleToJson)
+		{
+			param
+				avroMessageSchemaFile : dataDirectory() + "/twitter.avsc" ;
+				embedAvroSchema : true ;
+				tuplesPerMessage : 20l ;
+		}
+
+		/*
+		 * Write the Avro message to output files		
+		*/
+		() as WriteAvroFiles = FileSink(ConvertToAvro)
+		{
+			param
+				format : block ;
+				file : "/tmp/twitter_{localtime:%Y%m%d_%H%M%S}_{id}.avro" ;
+				flushOnPunctuation : true ;
+				closeMode : punct ;
+		}
+
+}
+
+

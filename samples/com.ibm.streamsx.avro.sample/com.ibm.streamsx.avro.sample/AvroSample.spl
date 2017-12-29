@@ -5,8 +5,6 @@ use com.ibm.streamsx.json::* ;
 
 composite AvroSample
 {
-	type
-		tweetT = rstring username, rstring tweet, uint64 tweettime ;
 	graph
 	/* Generate 100 tweets with a changing value for every tweet */
 		stream<tweetT> GenerateTweet = Beacon()

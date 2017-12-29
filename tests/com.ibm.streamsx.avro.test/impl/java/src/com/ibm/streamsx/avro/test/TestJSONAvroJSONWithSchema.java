@@ -11,14 +11,14 @@ import com.ibm.streamsx.avro.AvroToJSON;
 import com.ibm.streamsx.avro.JSONToAvro;
 import com.ibm.streamsx.avro.test.Display;
 
-public class TestJSONToAvro {
+public class TestJSONAvroJSONWithSchema {
 
 	/**
 	 * @param args
 	 */
 	public static void main(String[] args) {
-		String avroBlobT = "tuple<blob avroBlob, uint64 timeStamp>";
-		String jsonStringT = "tuple<rstring jsonString, uint64 timeStamp>";
+		String avroBlobT = "tuple<blob avroMessage, uint64 timeStamp>";
+		String jsonStringT = "tuple<rstring jsonMessage, uint64 timeStamp>";
 
 		OperatorGraph graph = OperatorGraphFactory.newGraph();
 
@@ -27,13 +27,18 @@ public class TestJSONToAvro {
 
 		// Declare a JSONToAvro operator
 		OperatorInvocation<JSONToAvro> jsonToAvroOp = graph.addOperator(JSONToAvro.class);
-		jsonToAvroOp.setStringParameter("avroSchemaFile", "data/twitter.avsc");
+		jsonToAvroOp.setStringParameter("avroMessageSchemaFile", "data/twitter.avsc");
+		jsonToAvroOp.setBooleanParameter("embedAvroSchema", true);
+		// jsonToAvroOp.setBooleanParameter("submitOnPunct", true);
+		// jsonToAvroOp.setLongParameter("bytesPerMessage", 1600);
+		jsonToAvroOp.setLongParameter("timePerMessage", 60);
+		jsonToAvroOp.setBooleanParameter("ignoreParsingError", false);
 		jsonToAvroOp.addInput(jsonBeaconOut);
 		OutputPortDeclaration jsonToAvroOut = jsonToAvroOp.addOutput(avroBlobT);
 
 		// Use the output of the JSONToAvro to convert back to JSON
 		OperatorInvocation<AvroToJSON> avroToJSONOp = graph.addOperator(AvroToJSON.class);
-		avroToJSONOp.setStringParameter("avroSchemaFile", "data/twitter.avsc");
+		avroToJSONOp.setBooleanParameter("avroSchemaEmbedded", true);
 		avroToJSONOp.addInput(jsonToAvroOut);
 		OutputPortDeclaration avroToJsonOut = avroToJSONOp.addOutput(jsonStringT);
 
@@ -50,7 +55,7 @@ public class TestJSONToAvro {
 		// Future<JavaTestableGraph> future = null;
 		try {
 			executableGraph = tester.executable(graph);
-			executableGraph.setTraceLevel(TraceLevel.INFO);
+			executableGraph.setTraceLevel(TraceLevel.TRACE);
 			executableGraph.executeToCompletion();
 		} catch (Exception e) {
 			e.printStackTrace();

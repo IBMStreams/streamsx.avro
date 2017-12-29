@@ -1,22 +1,68 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-<toolkitModel xmlns="http://www.ibm.com/xmlns/prod/streams/spl/toolkit" productVersion="4.2.0.1" xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common" xmlns:ti="http://www.ibm.com/xmlns/prod/streams/spl/toolkitInfo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<toolkitModel xmlns="http://www.ibm.com/xmlns/prod/streams/spl/toolkit" productVersion="4.2.1.3" xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common" xmlns:ti="http://www.ibm.com/xmlns/prod/streams/spl/toolkitInfo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 
-  <toolkit name="com.ibm.streamsx.avro" requiredProductVersion="4.2.0.0" version="1.0.3">
+  <toolkit name="com.ibm.streamsx.avro" requiredProductVersion="4.2.0.0" version="1.1.0">
     <description>This toolkit provides SerDes for Apache Avro</description>
     <uriTable>
-      <uri index="1" value="com.ibm.streamsx.avro/AvroToJSON"/>
-      <uri index="5" value="com.ibm.streamsx.avro/JSONToAvro/JSONToAvro_16x16.png"/>
-      <uri index="6" value="com.ibm.streamsx.avro/JSONToAvro/JSONToAvro_32x32.png"/>
-      <uri index="4" value="com.ibm.streamsx.avro/JSONToAvro"/>
-      <uri index="2" value="com.ibm.streamsx.avro/AvroToJSON/AvroToJSON_16x16.png"/>
-      <uri index="3" value="com.ibm.streamsx.avro/AvroToJSON/AvroToJSON_32x32.png"/>
+      <uri index="4" value="com.ibm.streamsx.avro/AvroToJSON"/>
+      <uri index="2" value="com.ibm.streamsx.avro/JSONToAvro/JSONToAvro_16x16.png"/>
+      <uri index="3" value="com.ibm.streamsx.avro/JSONToAvro/JSONToAvro_32x32.png"/>
+      <uri index="1" value="com.ibm.streamsx.avro/JSONToAvro"/>
+      <uri index="5" value="com.ibm.streamsx.avro/AvroToJSON/AvroToJSON_16x16.png"/>
+      <uri index="6" value="com.ibm.streamsx.avro/AvroToJSON/AvroToJSON_32x32.png"/>
     </uriTable>
     <namespace name="com.ibm.streamsx.avro">
-      <primitiveOp language="Java" modelUriIndex="1" name="AvroToJSON" public="true">
-        <description>This operator binary Avro messages and optionally message keys into a JSON string. If an invalid Avro message or key is found in the input, the operator will fail.</description>
+      <primitiveOp language="Java" modelUriIndex="1" name="JSONToAvro" public="true">
+        <description>This operator converts JSON strings into binary Avro messages. If an invalid JSON string is found in the input, the operator will fail.</description>
         <images>
           <image size="16" uriIndex="2"/>
           <image size="32" uriIndex="3"/>
+        </images>
+        <parameter expressionMode="Constant" name="vmArg" optional="true" type="rstring">
+          <description>
+Specifies command-line arguments that are passed to the Java virtual machine that the operator runs within.
+</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="avroMessageSchemaFile" optional="false" type="rstring">
+          <description>File that contains the Avro schema to serialize the Avro message(s).</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="bytesPerMessage" optional="true" type="int64">
+          <description>Only valid if Avro schema is embedded in the output. This parameter controls the minimum size in bytes that the Avro message block should be before it is submitted to the outputport.</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="embedAvroSchema" optional="true" type="boolean">
+          <description>Embed the schema in the generated Avro message. When generating Avro messages that must be persisted to a file system, the schema is expected to be included in the file. If this parameter is set to true, incoming JSON tuples are batched and a large binary object that contains the Avro schema and 1 or more messages is generated. Also, you must specify one of the parameters (submitOnPunct, bytesPerMessage, tuplesPerMessage, timePerMessage) that controls when Avro message block is submitted to the output port.After submitting the Avro message to the output port, a punctuation is generated so that the receiving operator can potentially create a new file.</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="ignoreParsingError" optional="true" type="boolean">
+          <description>Ignore any JSON or Avro parsing errors. When set to true, errors that occur when parsing the incoming JSON tuple or constructing the Avro tuple(s) will be ignored and the incoming tuple(s) will be skipped.</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="inputJsonMessage" optional="true" type="rstring">
+          <description>The input stream attribute which contains the input JSON message string. This attribute must be of `rstring` or `ustring` type. Default is the sole input attribute when the schema has one attribute otherwise `jsonMessage`.</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="outputAvroMessage" optional="true" type="rstring">
+          <description>The ouput stream attribute which contains the output Avro message(s). This attribute must be of type blob. Default is the sole output attribute when the schema has one attribute otherwise `avroMessage`.</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="submitOnPunct" optional="true" type="boolean">
+          <description>Only valid if Avro schema is embedded in the output. When set to true, this the operator will submit the block of Avro messages what was built and generate a punctuation so that the receiving operator can potentially create a new file.</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="timePerMessage" optional="true" type="int64">
+          <description>Only valid if Avro schema is embedded in the output. This parameter controls the maximum time in seconds before the Avro message block is submitted to the output port.</description>
+        </parameter>
+        <parameter cardinality="1" expressionMode="AttributeFree" name="tuplesPerMessage" optional="true" type="int64">
+          <description>Only valid if Avro schema is embedded in the output. This parameter controls the minimum number of tuples that the Avro message block should contain before it is submitted to the outputport.</description>
+        </parameter>
+        <inputPort maxNumPorts="1" minNumPorts="1" optional="false" windowPunctInputMode="Oblivious">
+          <description>Port that ingests JSON records</description>
+          <windowPolicy>NonWindowed</windowPolicy>
+        </inputPort>
+        <outputPort expressionMode="Nonexistent" maxNumPorts="1" minNumPorts="1" optional="false" windowPunctOutputMode="Generating">
+          <description>Port that produces Avro records</description>
+        </outputPort>
+      </primitiveOp>
+      <primitiveOp language="Java" modelUriIndex="4" name="AvroToJSON" public="true">
+        <description>This operator binary Avro messages and optionally message keys into a JSON string. If an invalid Avro message or key is found in the input, the operator will fail.</description>
+        <images>
+          <image size="16" uriIndex="5"/>
+          <image size="32" uriIndex="6"/>
         </images>
         <parameter expressionMode="Constant" name="vmArg" optional="true" type="rstring">
           <description>
@@ -30,7 +76,7 @@ Specifies command-line arguments that are passed to the Java virtual machine tha
           <description>File that contains the Avro schema to deserialize the binary Avro message.</description>
         </parameter>
         <parameter cardinality="1" expressionMode="AttributeFree" name="avroSchemaEmbedded" optional="true" type="boolean">
-          <description>Is the Avro schema embedded in the input Avro blob(s)F?</description>
+          <description>Is the Avro schema embedded in the input Avro blob(s)?</description>
         </parameter>
         <parameter cardinality="1" expressionMode="AttributeFree" name="inputAvroKey" optional="true" type="rstring">
           <description>The input stream attribute which contains the input Avro key blob. This attribute must be of type blob. If not specified, the default attribute is `avroKey`.</description>
@@ -50,34 +96,6 @@ Specifies command-line arguments that are passed to the Java virtual machine tha
         </inputPort>
         <outputPort expressionMode="Nonexistent" maxNumPorts="1" minNumPorts="1" optional="false" windowPunctOutputMode="Generating">
           <description>Port that produces tuples</description>
-        </outputPort>
-      </primitiveOp>
-      <primitiveOp language="Java" modelUriIndex="4" name="JSONToAvro" public="true">
-        <description>This operator converts JSON strings into binary Avro messages. If an invalid JSON string is found in the input, the operator will fail.</description>
-        <images>
-          <image size="16" uriIndex="5"/>
-          <image size="32" uriIndex="6"/>
-        </images>
-        <parameter expressionMode="Constant" name="vmArg" optional="true" type="rstring">
-          <description>
-Specifies command-line arguments that are passed to the Java virtual machine that the operator runs within.
-</description>
-        </parameter>
-        <parameter cardinality="1" expressionMode="AttributeFree" name="avroMessageSchemaFile" optional="false" type="rstring">
-          <description>File that contains the Avro schema to serialize the binary message.</description>
-        </parameter>
-        <parameter cardinality="1" expressionMode="AttributeFree" name="inputJsonMessage" optional="true" type="rstring">
-          <description>The input stream attribute which contains the input JSON message Fstring. This attribute must be of `rstring` or `ustring` type. Default is the sole input attribute when the schema has one attribute otherwise `jsonMessage`.</description>
-        </parameter>
-        <parameter cardinality="1" expressionMode="AttributeFree" name="outputAvroMessage" optional="true" type="rstring">
-          <description>The ouput stream attribute which contains the output Avro message. This attribute must be of type blob. Default is the sole output attribute when the schema has one attribute otherwise `avroMessage`.</description>
-        </parameter>
-        <inputPort maxNumPorts="1" minNumPorts="1" optional="false" windowPunctInputMode="Oblivious">
-          <description>Port that ingests JSON records</description>
-          <windowPolicy>NonWindowed</windowPolicy>
-        </inputPort>
-        <outputPort expressionMode="Nonexistent" maxNumPorts="1" minNumPorts="1" optional="false" windowPunctOutputMode="Generating">
-          <description>Port that produces Avro records</description>
         </outputPort>
       </primitiveOp>
     </namespace>

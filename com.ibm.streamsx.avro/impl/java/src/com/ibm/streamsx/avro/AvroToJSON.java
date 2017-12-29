@@ -102,7 +102,7 @@ public class AvroToJSON extends AbstractOperator {
 		this.avroKeySchemaFile = avroKeySchemaFile;
 	}
 
-	@Parameter(optional = true, description = "Is the Avro schema embedded in the input Avro blob(s)F?")
+	@Parameter(optional = true, description = "Is the Avro schema embedded in the input Avro blob(s)?")
 	public void setAvroSchemaEmbedded(boolean avroSchemaEmbedded) {
 		this.avroSchemaEmbedded = avroSchemaEmbedded;
 	}
@@ -212,10 +212,14 @@ public class AvroToJSON extends AbstractOperator {
 		}
 
 		// Submit JSON tuples based on the Avro content received in the Blob
-		if (!avroSchemaEmbedded) {
-			processAvroMessage(avroMessage, avroKey, outStream, outTuple, messageSchema, keySchema);
-		} else {
-			processAvroMessage(avroMessage, outStream, outTuple);
+		try {
+			if (!avroSchemaEmbedded) {
+				processAvroMessage(avroMessage, avroKey, outStream, outTuple, messageSchema, keySchema);
+			} else {
+				processAvroMessage(avroMessage, outStream, outTuple);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -285,6 +289,8 @@ public class AvroToJSON extends AbstractOperator {
 		GenericRecord consumedDatum = null;
 		while (dataFileReader.hasNext()) {
 			consumedDatum = dataFileReader.next(consumedDatum);
+			if (LOGGER.isTraceEnabled())
+				LOGGER.log(TraceLevel.TRACE, "JSON representation of Avro message: " + consumedDatum.toString());
 			// Submit new tuple to output port 0
 			outTuple.setString(outputJsonMessage, consumedDatum.toString());
 			outStream.submit(outTuple);

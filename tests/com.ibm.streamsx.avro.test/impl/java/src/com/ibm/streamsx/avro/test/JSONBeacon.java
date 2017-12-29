@@ -119,6 +119,8 @@ public class JSONBeacon extends ProcessTupleProducer {
 			tuple.setString(0, jsonString);
 			tuple.setLong(1, timeStamp);
 			out.submit(tuple);
+			if (i != 0 && i % 20 == 0)
+				out.punctuate(Punctuation.WINDOW_MARKER);
 		}
 
 		// Make the set of tuples a window.

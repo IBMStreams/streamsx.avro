@@ -12,6 +12,7 @@ These steps must be run on the Streams server (or the Streams Quick Start Editio
 * Go to the toolkit's main directory that holds the `build.xml` file, for example: `cd /tmp/streamsx.avro`
 * Run `ant`
 
-## Implementing the CDC toolkit on the Streams server
+## Implementing the Avro toolkit on the Streams server
 To register the toolkit in IBM Streams, it must be moved to a directory in the toolkit path.
 * Move the `com.ibm.streamsx.avro` directory to `$STREAMS_INSTALL/toolkits`; this will make it visible to IBM Streams and Streams Studio. Alternatively you can move it to a different directory and include it in the Streams toolkit path (STREAMS_SPLPATH environment variable).
+* Move the `com.ibm.streamsx.avro.sample` directory to the `$STREAMS_INSTALL/samples directory to make the Avro samples visible when importing a sample Streams application

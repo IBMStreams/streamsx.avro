@@ -1,23 +1,37 @@
 
 package com.ibm.streamsx.avro.test;
 
+import java.math.BigDecimal;
+import java.nio.Buffer;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
-import com.ibm.json.java.JSONObject;
 import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.OperatorContext.ContextCheck;
 import com.ibm.streams.operator.OutputTuple;
+import com.ibm.streams.operator.StreamSchema;
 import com.ibm.streams.operator.StreamingOutput;
+import com.ibm.streams.operator.Tuple;
+import com.ibm.streams.operator.Type;
+import com.ibm.streams.operator.Type.MetaType;
 import com.ibm.streams.operator.StreamingData.Punctuation;
 import com.ibm.streams.operator.compile.OperatorContextChecker;
+import com.ibm.streams.operator.meta.CollectionType;
+import com.ibm.streams.operator.meta.TupleType;
 import com.ibm.streams.operator.model.OutputPortSet;
 import com.ibm.streams.operator.model.OutputPorts;
 import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.model.PrimitiveOperator;
 import com.ibm.streams.operator.model.OutputPortSet.WindowPunctuationOutputMode;
 import com.ibm.streams.operator.samples.patterns.ProcessTupleProducer;
+import com.ibm.streams.operator.types.Blob;
+import com.ibm.streams.operator.types.RString;
+import com.ibm.streams.operator.types.Timestamp;
+import com.ibm.streams.operator.types.XML;
 
 /**
  * Sample source operator using a {@code process()} method. Operator that reads
@@ -47,10 +61,10 @@ import com.ibm.streams.operator.samples.patterns.ProcessTupleProducer;
  * 
  * @see com.ibm.streams.operator.samples.patterns.TupleProducer
  */
-@PrimitiveOperator(name = "JSONBeacon", namespace = "com.ibm.streamsx.avro.test", description = "Generates JSON strings and submits as tuples", comment = JSONBeacon.IBM_COPYRIGHT)
+@PrimitiveOperator(name = "TupleBeacon", namespace = "com.ibm.streamsx.avro.test", description = "Generates and submits tuples", comment = TupleBeacon.IBM_COPYRIGHT)
 @OutputPorts({
 		@OutputPortSet(cardinality = 1, windowPunctuationOutputMode = WindowPunctuationOutputMode.Generating, description = "Port requiring `name` and `value` attributes representing a system property. Optional `tags` attribute containing tags for the property") })
-public class JSONBeacon extends ProcessTupleProducer {
+public class TupleBeacon extends ProcessTupleProducer {
 
 	private String tagged;
 
@@ -106,24 +120,47 @@ public class JSONBeacon extends ProcessTupleProducer {
 
 		final StreamingOutput<OutputTuple> out = getOutput(0);
 
-		JSONObject json = new JSONObject();
 		for (int i = 0; i < 100; i++) {
-			json.put("username", "Frank");
-			json.put("tweet", "This JSON message also rocks: " + i);
-			json.put("timestamp", new Long(1048298240L + i));
-			
-			JSONObject location = new JSONObject();
-			location.put("country", "DK");
-			location.put("lat", 41.5 + i);
-			location.put("lon", -6.4 - i);
-			json.put("location", location);
+			String username = "Frank";
+			String tweet = "This JSON message also rocks: " + i;
+			Long timestamp = new Long(1048298240L + i);
+
+			StreamSchema schema = out.getStreamSchema();
+			StreamSchema locationSchema = ((TupleType) schema.getAttribute("location").getType()).getTupleSchema();
+			for (String attributeName : schema.getAttributeNames()) {
+				Type type = schema.getAttribute(attributeName).getType();
+			}
+
+			Map<String, Object> locationMap = new HashMap<String, Object>();
+			locationMap.put("country", new RString("DK"));
+			locationMap.put("lat", new Float(41.24 + i));
+			locationMap.put("lon", new Float(-5.1 - i));
+			Tuple locationTuple = locationSchema.getTuple(locationMap);
+
+			List<RString> retweetList = new ArrayList<RString>();
+			for (int j = 0; j < 10; j++)
+				retweetList.add(new RString("User " + j));
+
+			List<Tuple> followersList = new ArrayList<Tuple>();
+			Type followerSchemaType = ((CollectionType) schema.getAttribute("followers").getType()).getElementType();
+			StreamSchema followerSchema = ((TupleType) followerSchemaType).getTupleSchema();
+			for (int j = 0; j < 5; j++) {
+				Map<String, Object> followerMap = new HashMap<String, Object>();
+				followerMap.put("followeruser", new RString("Follower " + j));
+				followerMap.put("rate", new Double(j));
+				Tuple followerTuple = followerSchema.getTuple(followerMap);
+				followersList.add(followerTuple);
+			}
 
 			/* Now submit tuple */
 			OutputTuple tuple = out.newTuple();
-			String jsonString = json.serialize();
-			long timeStamp = System.currentTimeMillis();
-			tuple.setString(0, jsonString);
-			tuple.setLong(1, timeStamp);
+			tuple.setString("username", username);
+			tuple.setString("tweet", tweet);
+			tuple.setLong("timestamp", timestamp);
+			tuple.setBoolean("suspiciousContent", (i % 3 == 0));
+			tuple.setTuple("location", locationTuple);
+			tuple.setList("retweets", retweetList);
+			tuple.setList("followers", followersList);
 			out.submit(tuple);
 			if (i != 0 && i % 20 == 0)
 				out.punctuate(Punctuation.WINDOW_MARKER);

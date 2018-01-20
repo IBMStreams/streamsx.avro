@@ -13,3 +13,6 @@
 
 # Windows thumb index file
 Thumbs.db
+
+# MacOS directory file
+.DS_Store

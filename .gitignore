@@ -1,0 +1,23 @@
+*.class
+
+**/.apt_generated/
+
+/tmp/
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+/.README.md.html
+
+**/.DS_Store
+
+com.ibm.streamsx.avro/.apt_generated/
+com.ibm.streamsx.avro/output/
+com.ibm.streamsx.avro/.toolkitList
+com.ibm.streamsx.avro/toolkit.xml
+com.ibm.streamsx.avro/doc/spldoc
+com.ibm.streamsx.avro/bin/
+com.ibm.streamsx.avro/opt/downloaded/
+com.ibm.streamsx.avro/com.ibm.streamsx.avro/AvroToJSON/AvroToJSON.xml
+com.ibm.streamsx.avro/com.ibm.streamsx.avro/JSONToAvro/JSONToAvro.xml
+com.ibm.streamsx.avro/com.ibm.streamsx.avro/TupleToAvro/TupleToAvro.xml
+com.ibm.streamsx.avro/impl/lib/com.ibm.streamsx.avro.jar

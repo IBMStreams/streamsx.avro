@@ -303,7 +303,7 @@ public class TupleToAvro extends AbstractOperator {
 
 	static final String DESC = "This operator converts Streams tuples into binary Avro messages. The input tuples can be"
 			+ "nested types with lists and tuples, but the attribute types must be mappable to the Avro primitive types. "
-			+ "{boolean, float32, float64, int32, int64, rstring and ustring} are respectively mapped to "
-			+ "{Boolean, Float, Double, Integer, Long, String}";
+			+ "boolean, float32, float64, int32, int64, rstring and ustring are respectively mapped to "
+			+ "Boolean, Float, Double, Integer, Long, String";
 
 }

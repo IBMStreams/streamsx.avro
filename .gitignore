@@ -10,11 +10,14 @@ hs_err_pid*
 
 **/.DS_Store
 
+**/toolkit.xml
+release/
 doc/spldoc/
+samples/doc/spldoc/
 com.ibm.streamsx.avro/.apt_generated/
 com.ibm.streamsx.avro/output/
 com.ibm.streamsx.avro/.toolkitList
-com.ibm.streamsx.avro/toolkit.xml
+com.ibm.streamsx.avro/build.info
 com.ibm.streamsx.avro/doc/spldoc
 com.ibm.streamsx.avro/bin/
 com.ibm.streamsx.avro/impl/java/bin/

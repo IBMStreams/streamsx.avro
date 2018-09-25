@@ -1,0 +1,98 @@
+
+<project name="streamsx.avro" default="all">
+	<description>Build file for streamsx.avro project, built the toolkit, doc, release, test</description>
+	
+	<!-- check streams install -->
+	<property environment="env" />
+	<!-- Exit if there is a bad value in streams.install -->
+	<fail unless="env.STREAMS_INSTALL" message="No streams installation found. Exiting!"/>
+	<!-- set global properties for this build -->
+	<property name="toolkit.dir"     location="com.ibm.streamsx.avro" />
+	<property name="toolkit.test"    location="tests" />
+	<property name="toolkit.doc"     location="doc/spldoc" />
+	<property name="toolkit.samples.dir" location="samples" />
+	<property name="spl-mt"          value="${env.STREAMS_INSTALL}/bin/spl-make-toolkit"/>
+	<property name="spl-md"          value="${env.STREAMS_INSTALL}/bin/spl-make-doc"/>
+	<property name="release.dir"     location="release"/>
+
+	<!-- Create the time stamp -->
+	<tstamp/>
+
+	<!-- Extract the git commit hash -->
+	<exec executable="git" outputproperty="commithash">
+		<arg value="rev-parse" />
+		<arg value="--short" />
+		<arg value="HEAD" />
+	</exec>
+	
+	<!-- these targets are here due to compatibility -->
+	<target name="all"   depends="toolkit"                    description="Build all toolkit artifacts - incremental build"/>
+	<target name="clean" depends="toolkit-clean,doc-clean" description="Clean all generated and downloaded toolkit files, clean samples and clean the documentation"/>
+
+	<target name="toolkit" description="Build toolkit code and index the toolkit - incremental build.">
+		<ant dir="${toolkit.dir}" target="all" />
+	</target>
+	
+	<target name="toolkit-clean" description="Clean all generated and downloaded toolkit files and cleans samples">
+		<ant dir="${toolkit.dir}" target="clean" />
+	</target>
+
+	<target name="doc" depends="toolkit"
+		description="Generate the toolkit documentation">
+		<property name="tktitle" value="IBMStreams ${ant.project.name} Toolkit" />
+		<property name="tkauthor" value="IBMStreams Open Source Community at GitHub - https://github.com/IBMStreams/${ant.project.name}" />
+		<echo message="Tookit to SPLDOC: ${toolkit.doc}" />
+		<exec executable="${spl-md}">
+			<arg value="--include-composite-operator-diagram" />
+			<arg value="--author" />
+			<arg value="${tkauthor}" />
+			<arg value="--doc-title" />
+			<arg value="${tktitle}" />
+			<arg value="--directory" />
+			<arg value="${toolkit.dir}" />
+			<arg value="--copy-image-files" />
+			<arg value="--output-directory" />
+			<arg value="${toolkit.doc}" />
+		</exec>
+	</target>
+	
+	<target name="doc-clean"
+		description="Clean the toolkit documentation">
+		<delete dir="${toolkit.doc}"/>
+	</target>
+	
+	<!-- Test targets -->
+	<target name="test"
+		description="Execute the toolkit test. Requires an up to date toolkit build">
+		<echo message="TODO: implement"/>
+	</target>
+
+	<target name="test-quick"
+		description="Execute the toolkit quick test. Requires an up to date toolkit build">
+		<echo message="TODO: implement"/>
+	</target>
+
+	<target name="test-clean"
+		description="Claen up all generated test artifacts">
+		<echo message="TODO: implement"/>
+	</target>
+	
+	<!-- Targets to build releases -->
+	<target name="release" depends="clean" description="Make a toolkit release archive">
+		<antcall target="doc"/>
+		<antcall target="test-quick"/> <!-- check if samples are compile clean -->
+		<antcall target="samples-clean"/> <!-- remove samples build artifacts -->
+		<mkdir dir="${release.dir}"/>
+		<xmlproperty file="${toolkit.dir}/info.xml" prefix="tkinfo" keepRoot="no"/>
+		<echo message="Make releasefile Toolkit Version: ${tkinfo.info:identity.info:version}"/>
+		<property name="releasefilename" value="${release.dir}/${ant.project.name}-${tkinfo.info:identity.info:version}-${DSTAMP}-${TSTAMP}-${commithash}.tgz"/>
+		<!-- TODO: include samples .project .settitngs and .classpath -->
+		<tar compression="gzip" longfile="gnu"
+			destfile="${releasefilename}"
+			basedir="${basedir}"
+			excludes="**/.toolkitList **/.gitignore **/.settings/** **/.settings **/.project **/.classpath **/opt/downloaded/** release/** tmp/**"
+		/>
+		<checksum file="${releasefilename}"/>
+		<checksum algorithm="sha1" file="${releasefilename}"/>
+	</target>
+</project>

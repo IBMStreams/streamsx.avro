@@ -17,7 +17,8 @@
 	<property name="build.dir"         value="impl/java/classes" /> <!-- this is not included in sab by default, thus no .class files in sab -->
 	<property name="gensrc.dir"        location="impl/java/src-gen"/> <!-- avoid .java files in output folder -->
 	<property name="impl.lib.dir"      value="impl/lib" />
-	<property name="ext.downloads.dir" value="opt/downloaded" />
+	<property name="opt.dir"           value="opt"/>
+	<property name="ext.downloads.dir" value="${opt.dir}/downloaded" />
 	<property name="jarfile"           value="com.ibm.streamsx.avro.jar" />
 	<property name="pom.file"          value="pom.xml" />
 
@@ -40,7 +41,7 @@
 	</target>
 
 	<target name="clean">
-		<delete verbose="true">
+		<delete verbose="true" includeemptydirs="true">
 			<!-- The fileset with the generated spl artifacts -->
 			<fileset dir="${basedir}">
 				<include name="com.ibm.streamsx.avro/*/*.xml"/>
@@ -50,7 +51,7 @@
 		<delete dir="${build.dir}" />
 		<delete dir="${impl.lib.dir}" />
 		<delete dir="${gensrc.dir}" />
-		<delete dir="${ext.downloads.dir}" />
+		<delete dir="${opt.dir}"/>
 	</target>
 
 	<!-- Downloads libraries using maven -->

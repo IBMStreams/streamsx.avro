@@ -7,14 +7,17 @@
 	<fail unless="env.STREAMS_INSTALL" message="No streams installation found. Exiting!"/>
 	
 	<!-- set global properties for this build -->
-	<property name="toolkit.dir"         location="com.ibm.streamsx.avro"/>
-	<property name="doc"                 value="doc"/> <!-- use a value here because git clean fails is this is an location and is empty -->
-	<property name="doc.dir"             location="${doc}/spldoc"/>
-	<property name="samples.dir"         location="samples"/>
-	<property name="samples.doc.dir"     location="samples/doc/spldoc"/>
-	<property name="test.dir"            location="tests"/>
-	<property name="release.dir"         location="release"/>
+	<property name="toolkit.dir"         value="com.ibm.streamsx.avro"/>
+	<property name="doc.string"          value="doc"/>
+	<property name="doc.dir"             value="${doc.string}/spldoc"/>
+	<property name="samples.dir"         value="samples"/>
+	<property name="samples.doc.dir"     value="samples/${doc.string}/spldoc"/>
+	<property name="test.dir"            value="tests"/>
+	<property name="release.dir"         value="release"/>
 	<property name="release.info.file"   value="${toolkit.dir}/build.info"/>
+
+	<property name="tktitle"             value="IBMStreams ${ant.project.name} Toolkit" />
+	<property name="tkauthor"            value="IBMStreams Open Source Community at GitHub - https://github.com/IBMStreams/${ant.project.name}" />
 
 	<property name="spl-mt"              value="${env.STREAMS_INSTALL}/bin/spl-make-toolkit"/>
 	<property name="spl-md"              value="${env.STREAMS_INSTALL}/bin/spl-make-doc"/>
@@ -30,23 +33,24 @@
 		<arg value="HEAD" />
 	</exec>
 	
-	<!-- these targets are here due to compatibility -->
-	<target name="all"   depends="toolkit,doc,samples-doc"                   description="Build all toolkit artifacts - incremental build"/>
-	<target name="clean" depends="releaseinfo-clean,toolkit-clean,doc-clean" description="Clean all generated and downloaded toolkit files, clean samples and clean the documentation"/>
+	<target name="all"   depends="toolkit,spldoc,samples-spldoc"
+		description="Main target: Build all toolkit artifacts, toolkit documentation and samples doc - incremental build"/>
+	<target name="clean" depends="releaseinfo-clean,toolkit-clean,spldoc-clean"
+		description="Main target: Clean all generated and downloaded toolkit files, clean samples and clean the documentation"/>
 
-	<target name="toolkit" description="Build toolkit code and index the toolkit - incremental build.">
-		<ant dir="${toolkit.dir}" target="all" />
+	<target name="toolkit"
+		description="Main target: Build toolkit code and index the toolkit - incremental build.">
+		<ant dir="${toolkit.dir}" target="toolkit" />
 	</target>
 	
-	<target name="toolkit-clean" description="Clean all generated and downloaded toolkit files and cleans samples">
+	<target name="toolkit-clean"
+		description="Main target: Clean all generated and downloaded toolkit files and cleans samples">
 		<ant dir="${toolkit.dir}" target="clean" />
 	</target>
 
-	<target name="doc" depends="toolkit"
+	<target name="spldoc" depends="toolkit"
 		description="Generate the toolkit documentation">
-		<property name="tktitle" value="IBMStreams ${ant.project.name} Toolkit" />
-		<property name="tkauthor" value="IBMStreams Open Source Community at GitHub - https://github.cooolkit.samples.doc.dirm/IBMStreams/${ant.project.name}" />
-		<echo message="Tookit to SPLDOC: ${doc.dir}" />
+		<echo message="Tookit spldoc to: ${doc.dir}"/>
 		<exec executable="${spl-md}">
 			<arg value="--include-composite-operator-diagram" />
 			<arg value="--author" />
@@ -55,15 +59,16 @@
 			<arg value="${tktitle}" />
 			<arg value="--directory" />
 			<arg value="${toolkit.dir}" />
+			<arg value="--warn-no-comments"/>
 			<arg value="--copy-image-files" />
 			<arg value="--output-directory" />
 			<arg value="${doc.dir}" />
 		</exec>
 	</target>
 	
-	<target name="doc-clean"
+	<target name="spldoc-clean"
 		description="Clean the toolkit documentation">
-		<delete dir="${doc.dir}"/>
+		<delete dir="${doc.string}"/>
 		<delete dir="${samples.doc.dir}"/>
 	</target>
 	
@@ -72,7 +77,7 @@
 		description="Build all samples">
 		<subant genericantfile="${basedir}/build.xml">
 			<target name="build-sample-target"/>
-			<dirset dir="samples" includes="*" excludes="doc"/>
+			<dirset dir="samples" includes="*" excludes="${doc.string}"/>
 		</subant>
 	</target>
 	
@@ -80,15 +85,13 @@
 		description="Clean up samples index and samples code">
 		<subant genericantfile="${basedir}/build.xml">
 			<target name="clean-sample-target"/>
-			<dirset dir="samples" includes="*" excludes="doc"/>
+			<dirset dir="samples" includes="*" excludes="${doc.string}"/>
 		</subant>
 	</target>
 
-	<target name="samples-doc" depends="samples"
+	<target name="samples-spldoc" depends="samples"
 		description="Generate the doc for all samples">
-		<echo message="All samples to SPLDOC: ${basedir}"/>
-		<property name="tktitle" value="IBMStreams ${ant.project.name} Toolkit" />
-		<property name="tkauthor" value="IBMStreams Open Source Community at GitHub - https://github.com/IBMStreams/${ant.project.name}" />
+		<echo message="All samples spldoc to: ${samples.doc.dir}"/>
 		<exec executable="${spl-md}">
 			<arg value="--include-composite-operator-diagram"/>
 			<arg value="--author"/>
@@ -140,18 +143,18 @@
 	</target>
 
 	<target name="test-clean"
-		description="Claen up all generated test artifacts">
+		description="Clean up all generated test artifacts">
 		<echo message="TODO: implement"/>
 	</target>
 	
 	<!-- Targets to build releases -->
-	<target name="release" depends="clean"
-		description="Make a toolkit release archive - purge workspace and build toolkit from scratch">
+	<target name="release" depends="clean,spldoc-clean"
+		description="Main target: Make a toolkit release archive - purge workspace and build toolkit from scratch">
 		<antcall target="release-target" inheritAll="true"/>
 	</target>
 	
 	<target name="release-target" depends="releaseinfo">
-		<antcall target="doc"/>
+		<antcall target="spldoc"/>
 		<antcall target="samples"/> <!-- check if samples are compile clean -->
 		<antcall target="samples-clean"/> <!-- remove samples build artifacts -->
 		<mkdir dir="${release.dir}"/>
@@ -161,15 +164,17 @@
 		<tar compression="gzip" longfile="gnu"
 			destfile="${releasefilename}"
 			basedir="${basedir}"
-			excludes="**/.toolkitList **/.gitignore **/.settings/** **/.settings **/.project **/.classpath release/** test/**"
+			includes="${toolkit.dir}/** ${samples.dir}/** ${doc.string}/** README.md LICENSE"
+			excludes="**/.toolkitList **/.gitignore ${toolkit.dir}/.settings/ ${toolkit.dir}/.project ${toolkit.dir}/.classpath ${toolkit.dir}/build.xml ${toolkit.dir}/pom.xml ${toolkit.dir}/icons/ ${toolkit.dir}/impl/java/"
 		/>
+		
 		<checksum file="${releasefilename}"/>
 		<checksum algorithm="sha1" file="${releasefilename}"/>
 	</target>
 	
 	<!-- Extract the git commit hash and make release info -->
 	<target name="releaseinfo" depends="clean-ignored"
-		description="Make the release information file ${release.info.file}">
+		description="Make the release information file">
 		<exec executable="git" outputproperty="commithash.long" failonerror="true">
 			<arg value="rev-parse" />
 			<arg value="HEAD" />
@@ -190,7 +195,7 @@
 	</target>
 
 	<target name="releaseinfo-clean"
-		description="remove the release information file ${release.info.file}">
+		description="Remove the release information file">
 		<delete file="${release.info.file}"/>
 	</target>
 	
@@ -231,7 +236,7 @@
 			<arg value="--"/>
 			<arg value="${toolkit.dir}"/>
 			<arg value="${samples.dir}"/>
-			<arg value="${doc}"/>
+			<arg value="${doc.string}"/> <!-- use a value here because git clean fails is this is an location and is empty -->
 		</exec>
 	</target>
 
@@ -244,7 +249,7 @@
 			<arg value="--"/>
 			<arg value="${toolkit.dir}"/>
 			<arg value="${samples.dir}"/>
-			<arg value="${doc}"/>
+			<arg value="${doc.string}"/> <!-- use a value here because git clean fails is this is an location and is empty -->
 		</exec>
 		<!-- set condition true if there are any non-whitespaces -->
 		<condition property="has.untracked">

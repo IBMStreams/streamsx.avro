@@ -6,7 +6,7 @@ use com.ibm.streamsx.json::* ;
 /**
  * Convert tuple to JSON, then to Avro and back to JSON. Avro AND JSON output is printed to the console output.
  */
-composite AvroJSONSample
+public composite AvroJSONSample
 {
 	type 
 		/**

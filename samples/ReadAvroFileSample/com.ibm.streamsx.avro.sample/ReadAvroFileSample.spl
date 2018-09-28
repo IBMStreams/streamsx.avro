@@ -6,7 +6,7 @@ use com.ibm.streamsx.json::*;
 /**
  * Read a file in avro format, convert the content to JSON and dump it to the console output.
  */
-composite ReadAvroFileSample
+public composite ReadAvroFileSample
 {
 	graph
 		// Read the entire .avro file

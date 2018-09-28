@@ -9,7 +9,7 @@ if [[ ( ! -e scripts ) || ( scripts -ot $installer ) ]]; then
 	fi
 fi
 if [[ -e ./scripts/bin/runTTF ]]; then
-	./scripts/bin/runTTF -i tests "$@"
+	./scripts/bin/runTTF --directory tests --workdir workdir "$@"
 else
 	echo "./scripts/bin/runTTF is not existing! Run the script './installTestFramework.sh' first" >&2
 	exit 1

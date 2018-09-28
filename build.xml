@@ -120,19 +120,30 @@
 	</target>
 
 	<!-- Test targets -->
-	<target name="test"
+	<target name="test" depends="toolkit"
 		description="Execute the toolkit test. Requires an up to date toolkit build">
-		<echo message="TODO: implement"/>
+		<echo message="Start full test"/>
+		<exec executable="./runTest.sh" dir="${test.dir}/frameworktests" failonerror="true">
+			<arg value="--noprompt"/>
+			<arg value="--no-browser"/>
+		</exec>
 	</target>
 
-	<target name="test-quick"
+	<target name="test-quick" depends="toolkit"
 		description="Execute the toolkit quick test. Requires an up to date toolkit build">
-		<echo message="TODO: implement"/>
+		<echo message="Start quick test"/>
+		<exec executable="./runTest.sh" dir="${test.dir}/frameworktests" failonerror="true">
+			<arg value="--noprompt"/>
+			<arg value="--no-browser"/>
+			<arg value="--category"/>
+			<arg value="quick"/>
+		</exec>
 	</target>
 
 	<target name="test-clean"
 		description="Clean up all generated test artifacts">
-		<echo message="TODO: implement"/>
+		<delete dir="${test.dir}/frameworktests/workdir"/>
+		<delete dir="${test.dir}/frameworktests/scripts"/>
 	</target>
 	
 	<!-- Targets to build releases -->

@@ -1,3 +1,0 @@
-namespace com.ibm.streamsx.avro.sample ;
-
-type tweetT = rstring username, rstring tweet, uint64 tweettime ;

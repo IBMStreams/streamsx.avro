@@ -1,0 +1,34 @@
+namespace com.ibm.streamsx.avro.sample;
+
+use com.ibm.streamsx.avro::*;
+use com.ibm.streamsx.json::*;
+
+/**
+ * Read a file in avro format, convert the content to JSON and dump it to the console output.
+ */
+composite ReadAvroFileSample
+{
+	graph
+		// Read the entire .avro file
+		stream<blob avroBlob> ReadFile = FileSource()
+		{
+			param
+				file : getThisToolkitDir()+"/etc/twitter.avro";
+				format : block;
+				blockSize : 3000u;
+		}
+
+		// Convert the blob to JSON
+		stream<rstring jsonMessage> ConvertAvroToJson = AvroToJSON(ReadFile)
+		{
+			param
+				avroSchemaEmbedded: true;
+		}
+
+		// Display the retrieved JSON message
+		() as DisplayJson = Custom(ConvertAvroToJson as I)
+		{
+			logic
+				onTuple I: println((rstring) I);
+		}
+}

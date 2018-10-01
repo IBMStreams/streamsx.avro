@@ -1,0 +1,32 @@
+use com.ibm.streamsx.avro::TupleToAvro;
+use com.ibm.streamsx.testframe::FileSink1;
+
+public composite Main {
+	type
+		tweetT = rstring username, rstring tweet, int64 tweettime;
+
+	graph
+		// Generate 100 tweets with a changing value for every tweet
+		stream<tweetT> GenerateTweet as O = Beacon() {
+			param
+				iterations : 100u ;
+			output O :
+				username = "Frank",
+				tweet = "Hi, this is a cool tweet! "+(rstring) IterationCount(),
+				tweettime = (int64)(1048298232ul + IterationCount());
+		}
+
+		// Batch the incoming tuples into Avro tuples with embedded schema
+		stream<blob avroMessage> ConvertToAvro = TupleToAvro(GenerateTweet) {
+			param
+				avroMessageSchemaFile: getApplicationDir()+"/etc/twitter.avsc";
+				embedAvroSchema: true;
+				tuplesPerMessage: 20l;
+		}
+
+		// Write the Avro message to output file
+		() as Sink = FileSink1(ConvertToAvro) { }
+
+	config
+		restartable : false;
+}

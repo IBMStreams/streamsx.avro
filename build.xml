@@ -32,7 +32,7 @@
 		<arg value="HEAD" />
 	</exec>
 	
-	<target name="all"   depends="toolkit,spldoc,spldoc-samples"
+	<target name="all"   depends="toolkit,spldoc"
 		description="Main target: Build all toolkit artifacts, toolkit documentation and samples doc - incremental build"/>
 	
 	<target name="clean" depends="spldoc-clean,samples-clean,toolkit-clean,releaseinfo-clean"

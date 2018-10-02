@@ -12,6 +12,7 @@ public composite Main {
 		stream<tweetT> GenerateTweet as O = Beacon() {
 			param
 				iterations : 100u ;
+				//<timePerMessage>period : 0.1;
 			output
 				O : username = "Frank", tweet = "Hi, this is a cool tweet! "
 					+(rstring) IterationCount(), tweettime = 1048298232ul + IterationCount() ;
@@ -24,12 +25,18 @@ public composite Main {
 		stream<blob avroMessage> ConvertToAvro = JSONToAvro(ConvertTupleToJson) {
 			param
 				avroMessageSchemaFile: getApplicationDir()+"/etc/twitter.avsc";
+				//<embedAvroSchema_false> embedAvroSchema: false;
+				//<!embedAvroSchema_false>embedAvroSchema: true;
+				//<submitOnPunct>         submitOnPunct: true;
+				//<tuplesPerMessage>      tuplesPerMessage: 11l;
+				//<timePerMessage>        timePerMessage: 1l;
 		}
 		
 		/* Convert the Avro message to a JSON string */
 		stream<rstring jsonMessage> ConvertToJson = AvroToJSON(ConvertToAvro) {
 			param
-				avroMessageSchemaFile: getApplicationDir()+"/etc/twitter.avsc";
+				//<embedAvroSchema_false> avroMessageSchemaFile: getApplicationDir()+"/etc/twitter.avsc";
+				//<!embedAvroSchema_false>avroSchemaEmbedded: true;
 		}
 
 		// Write the Avro message to output file

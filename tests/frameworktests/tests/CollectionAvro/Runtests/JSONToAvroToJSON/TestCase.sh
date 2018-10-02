@@ -25,6 +25,8 @@ checkTuples() {
 		local count=$(wc -l data/Tuples | cut -f1 -d' ')
 		if [[ $count -ne 100 ]]; then
 			setFailure "Number of received tuples in ne 100. Count is: $count"
+		else
+			printInfo "Received tuple count: $count"
 		fi;;
 	tuplesPerMessage)
 		echoExecuteInterceptAndSuccess diff data/Tuples data/TuplesExpected_tuplesPerMessage;;
@@ -36,7 +38,12 @@ checkTuples() {
 checkWindowMarker() {
 	case "$TTRO_variantCase" in
 	timePerMessage)
-		;;
+		local count=$(wc -l data/WindowMarker | cut -f1 -d' ')
+		if [[ $count -lt 8 ]]; then
+			setFailure "Number of received window marker is less 8. Count is: $count"
+		else
+			printInfo "Received window marker count: $count"
+		fi;;
 	tuplesPerMessage)
 		echoExecuteInterceptAndSuccess diff data/WindowMarker data/WindowMarkerExpected_tuplesPerMessage;;
 	*)

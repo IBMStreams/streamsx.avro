@@ -1,3 +1,5 @@
+setCategory 'quick'
+
 PREPS='copyOnly'
 
 STEPS=(

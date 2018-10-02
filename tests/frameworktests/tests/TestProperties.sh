@@ -8,3 +8,7 @@ setVar 'TTPR_streamsxAvroToolkit' "$TTRO_inputDir/../../../com.ibm.streamsx.avro
 setVar 'TTPR_streamsxJsonToolkit' "$STREAMS_INSTALL/toolkits/com.ibm.streamsx.json"
 
 setVar 'TT_toolkitPath' "${TTPR_streamsxAvroToolkit}:${TTPR_streamsxJsonToolkit}" #consider more than one tk...
+
+#add timeouts
+#setVar 'TTPR_waitForJobHealth' 120
+setVar 'TTPR_timeout' 300

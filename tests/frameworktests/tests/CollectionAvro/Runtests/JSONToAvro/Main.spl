@@ -23,8 +23,6 @@ public composite Main {
 		stream<blob avroMessage> ConvertToAvro = JSONToAvro(ConvertTupleToJson) {
 			param
 				avroMessageSchemaFile: getApplicationDir()+"/etc/twitter.avsc";
-				embedAvroSchema: true;
-				tuplesPerMessage: 20l;
 		}
 
 		// Write the Avro message to output file

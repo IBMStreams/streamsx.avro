@@ -1,0 +1,29 @@
+{
+  "type" : "record",
+  "name" : "twitter_schema",
+  "namespace" : "com.ibm.streamsx.avro.sample",
+  "fields" : [ 
+  	{"name" : "username", "type" : "string", "doc" : "Name of the user account on Twitter.com"},
+  	{"name" : "tweet", "type" : "string", "doc" : "The content of the user's Twitter message"},
+  	{"name" : "timest", "type" : "long", "doc" : "Unix epoch time in seconds"},
+  	{"name" : "suspiciousContent", "type" : "boolean", "doc" : "Whether the content is suspicious"},
+  	{"name" : "location", "doc" : "Location record", "type" : {
+  		"name" : "locationType", "type" : "record",
+  		"fields" : [
+  			{"name" : "country", "type" : "string", "default" : null },
+  			{"name" : "lat", "type" : "float", "default" : 0.0 },
+  			{"name" : "lon", "type" : "float", "default" : 0.0 }
+  		]
+  	},
+  	"default" : null},
+  	{"name" : "retweets", "doc" : "List of users who retweeted", "type" : {"type" : "array", "items" : "string" }},
+  	{"name" : "followers", "doc" : "List of followers for this user", "type" : {"type" : "array", "items" : {
+  		"name" : "followersType", "type" : "record",
+  		"fields" : [
+  			{"name" : "followeruser", "type" : "string" },
+  			{"name" : "rate", "type" : "double" }
+  		]
+  	} }}
+  ],
+  "doc:" : "A basic schema for storing Twitter messages"
+}

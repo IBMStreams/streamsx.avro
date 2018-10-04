@@ -11,4 +11,4 @@ setVar 'TT_toolkitPath' "${TTPR_streamsxAvroToolkit}:${TTPR_streamsxJsonToolkit}
 
 #add timeouts
 #setVar 'TTPR_waitForJobHealth' 120
-setVar 'TTPR_timeout' 300
+setVar 'TTPR_timeout' 600

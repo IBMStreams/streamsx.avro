@@ -1,4 +1,4 @@
-#--variantList='embedAvroSchema_false submitOnPunct tuplesPerMessage timePerMessage'
+#--variantList='embedAvroSchema_false submitOnPunct tuplesPerMessage timePerMessage bytesPerMessage'
 
 if [[ $TTRO_variantCase == embedAvroSchema_false ]]; then
 	setCategory 'quick'
@@ -21,7 +21,7 @@ FINS='cancelJobAndLog'
 
 checkTuples() {
 	case "$TTRO_variantCase" in
-	timePerMessage)
+	timePerMessage|bytesPerMessage)
 		local count=$(wc -l data/Tuples | cut -f1 -d' ')
 		if [[ $count -ne 100 ]]; then
 			setFailure "Number of received tuples in ne 100. Count is: $count"
@@ -44,6 +44,13 @@ checkWindowMarker() {
 		else
 			printInfo "Received window marker count: $count"
 		fi;;
+	bytesPerMessage)
+		local count=$(wc -l data/WindowMarker | cut -f1 -d' ')
+		if [[ $count -lt 3 ]]; then
+			setFailure "Number of received window marker is less 3. Count is: $count"
+		else
+			printInfo "Received window marker count: $count"
+		fi;;
 	tuplesPerMessage)
 		echoExecuteInterceptAndSuccess diff data/WindowMarker data/WindowMarkerExpected_tuplesPerMessage;;
 	*)
@@ -53,7 +60,7 @@ checkWindowMarker() {
 
 checkFinalMarker() {
 	case "$TTRO_variantCase" in
-	timePerMessage)
+	timePerMessage|bytesPerMessage)
 		;;
 	tuplesPerMessage)
 		linewisePatternMatchInterceptAndSuccess data/FinalMarker ''  '{seq_=110,typ_="f",jsonMessage=""}';;

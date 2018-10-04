@@ -30,6 +30,7 @@ public composite Main {
 				//<submitOnPunct>         submitOnPunct: true;
 				//<tuplesPerMessage>      tuplesPerMessage: 11l;
 				//<timePerMessage>        timePerMessage: 1l;
+				//<bytesPerMessage>       bytesPerMessage: 1000l;
 		}
 		
 		/* Convert the Avro message to a JSON string */

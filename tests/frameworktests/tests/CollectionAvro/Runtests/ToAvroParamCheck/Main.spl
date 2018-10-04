@@ -1,0 +1,42 @@
+use com.ibm.streamsx.avro::JSONToAvro;
+use com.ibm.streamsx.avro::TupleToAvro;
+use com.ibm.streamsx.json::TupleToJSON;
+use com.ibm.streamsx.testframe::FileSink1;
+
+public composite Main {
+	type
+		tweetT = rstring username, rstring tweet, int64 tweettime;
+
+	graph
+		// Generate 100 tweets with a changing value for every tweet
+		stream<tweetT> GenerateTweet as O = Beacon() {
+			param
+				iterations : 100u ;
+			output
+				O : username = "Frank", tweet = "Hi, this is a cool tweet! "
+					+(rstring) IterationCount(), tweettime = 1048298232l + (int64)IterationCount() ;
+		}
+
+		// Convert the Tweet tuple to a JSON string
+		//<JsonEmbedAvroSchema_true JsonEmbedAvroSchema_false>stream<rstring jsonMessage> ConvertTupleToJson = TupleToJSON(GenerateTweet) { }
+
+		// Batch the incoming tuples into Avro tuples with embedded schema
+		//<JsonEmbedAvroSchema_true JsonEmbedAvroSchema_false>stream<blob avroMessage> ConvertToAvro = JSONToAvro(ConvertTupleToJson) {
+		//<JsonEmbedAvroSchema_true JsonEmbedAvroSchema_false>	param
+		//<JsonEmbedAvroSchema_true JsonEmbedAvroSchema_false>		avroMessageSchemaFile: getApplicationDir()+"/etc/twitter.avsc";
+				//<JsonEmbedAvroSchema_true>embedAvroSchema: true;
+				//<JsonEmbedAvroSchema_false>embedAvroSchema: false;
+				//<JsonEmbedAvroSchema_false>submitOnPunct: true;
+		//<JsonEmbedAvroSchema_true JsonEmbedAvroSchema_false>}
+		//<TupleEmbedAvroSchema_true TupleEmbedAvroSchema_false>stream<blob avroMessage> ConvertToAvro = TupleToAvro(GenerateTweet) {
+		//<TupleEmbedAvroSchema_true TupleEmbedAvroSchema_false>	param
+		//<TupleEmbedAvroSchema_true TupleEmbedAvroSchema_false>		avroMessageSchemaFile: getApplicationDir()+"/etc/twitter.avsc";
+				//<TupleEmbedAvroSchema_true>embedAvroSchema: true;
+				//<TupleEmbedAvroSchema_false>embedAvroSchema: false;
+				//<TupleEmbedAvroSchema_false>submitOnPunct: true;
+		//<TupleEmbedAvroSchema_true TupleEmbedAvroSchema_false>}
+
+
+	config
+		restartable : false;
+}

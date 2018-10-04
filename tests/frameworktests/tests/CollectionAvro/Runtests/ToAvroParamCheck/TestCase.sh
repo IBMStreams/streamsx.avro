@@ -1,4 +1,4 @@
-#--variantList='embedAvroSchema_true embedAvroSchema_false'
+#--variantList='JsonEmbedAvroSchema_true JsonEmbedAvroSchema_false TupleEmbedAvroSchema_true TupleEmbedAvroSchema_false'
 
 PREPS='copyAndMorphSpl'
 
@@ -10,11 +10,11 @@ STEPS=(
 
 checkOutput() {
 	case "$TTRO_variantCase" in
-	embedAvroSchema_true)
+	*EmbedAvroSchema_true)
 		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" "*ERROR*If Avro schema is embedded in the output, you must specify one of the thresholds when the tuple must be submitted (submitOnPunct, bytesPerMessage, timePerMessage, tuplesPerMessage).*";;
-	embedAvroSchema_false)
+	*EmbedAvroSchema_false)
 		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" "*ERROR*Parameter submitOnPunct can only be set to true if Avro schema is embedded in the output.";;
 	*)
-		printErrorAndExit "Wron variant $TTRO_variantCase" $errRt;;
+		printErrorAndExit "Wrong variant $TTRO_variantCase" $errRt;;
 	esac
 }

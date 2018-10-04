@@ -1,70 +1,54 @@
 #--variantList='embedAvroSchema_false submitOnPunct tuplesPerMessage timePerMessage bytesPerMessage'
 
-if [[ $TTRO_variantCase == embedAvroSchema_false ]]; then
-	setCategory 'quick'
-fi
-
 PREPS='copyAndMorphSpl'
 
 STEPS=(
-	'splCompile'
+	"splCompile"
 	'submitJob'
 	'checkJobNo'
 	'waitForFinAndHealth'
 	'cancelJobAndLog'
-	'checkTuples'
-	'checkWindowMarker'
-	'checkFinalMarker'
+	'checkOutput'
 )
 
 FINS='cancelJobAndLog'
 
-checkTuples() {
+checkOutput() {
+	local tuplecount=$(grep 'typ_="t",' data/Tuples | wc -l | cut -f1 -d' ')
+	local windowcount=$(grep 'typ_="w",' data/Tuples | wc -l | cut -f1 -d' ')
+	printInfo "Result contains $tuplecount tuples and $windowcount windowMarker"
 	case "$TTRO_variantCase" in
-	timePerMessage|bytesPerMessage)
-		local count=$(wc -l data/Tuples | cut -f1 -d' ')
-		if [[ $count -ne 100 ]]; then
-			setFailure "Number of received tuples in ne 100. Count is: $count"
-		else
-			printInfo "Received tuple count: $count"
-		fi;;
+	embedAvroSchema_false|submitOnPunct)
+		if [[ ( $tuplecount -ne 100 ) || ( $windowcount -ne 1 ) ]]; then
+			setFailure "Wrong counts not 100 and 1"
+		fi
+		echoExecuteInterceptAndSuccess diff data/Tuples data/TuplesReference;;
 	tuplesPerMessage)
-		echoExecuteInterceptAndSuccess diff data/Tuples data/TuplesExpected_tuplesPerMessage;;
+		if [[ ( $tuplecount -ne 100 ) || ( $windowcount -ne 10 ) ]]; then
+			setFailure "Wrong counts not 100 and 10"
+		fi
+		echoExecuteInterceptAndSuccess diff data/Tuples data/TuplesReference;;
 	*)
-		echoExecuteInterceptAndSuccess diff data/Tuples data/TuplesExpected;;
-	esac
-}
-
-checkWindowMarker() {
-	case "$TTRO_variantCase" in
-	timePerMessage)
-		local count=$(wc -l data/WindowMarker | cut -f1 -d' ')
-		if [[ $count -lt 8 ]]; then
-			setFailure "Number of received window marker is less 8. Count is: $count"
-		else
-			printInfo "Received window marker count: $count"
-		fi;;
-	bytesPerMessage)
-		local count=$(wc -l data/WindowMarker | cut -f1 -d' ')
-		if [[ $count -lt 3 ]]; then
-			setFailure "Number of received window marker is less 3. Count is: $count"
-		else
-			printInfo "Received window marker count: $count"
-		fi;;
-	tuplesPerMessage)
-		echoExecuteInterceptAndSuccess diff data/WindowMarker data/WindowMarkerExpected_tuplesPerMessage;;
-	*)
-		linewisePatternMatchInterceptAndSuccess data/WindowMarker '' '{seq_=100,typ_="w",jsonMessage=""}';;
-	esac
-}
-
-checkFinalMarker() {
-	case "$TTRO_variantCase" in
-	timePerMessage|bytesPerMessage)
-		;;
-	tuplesPerMessage)
-		linewisePatternMatchInterceptAndSuccess data/FinalMarker ''  '{seq_=110,typ_="f",jsonMessage=""}';;
-	*)
-		linewisePatternMatchInterceptAndSuccess data/FinalMarker ''  '{seq_=101,typ_="f",jsonMessage=""}';;
+		if [[ $tuplecount -ne 100 ]]; then
+			setFailure "Wrong tuple counts $tuplecount"
+		fi
+		#remove seq number and window marker entries
+		{
+			while read -r; do
+				if [[ $REPLY == *,typ_=\"t\",* ]]; then
+					local lin="${REPLY#*,typ_=\"t\",}"
+					echo "$lin" >> data/TuplesOnly
+				fi
+			done
+		} < data/Tuples
+		{
+			while read -r; do
+				if [[ $REPLY == *,typ_=\"t\",* ]]; then
+					local lin="${REPLY#*,typ_=\"t\",}"
+					echo "$lin" >> data/TuplesOnlyReference
+				fi
+			done
+		} < data/TuplesReference
+		echoExecuteInterceptAndSuccess diff data/TuplesOnly data/TuplesOnlyReference;;
 	esac
 }

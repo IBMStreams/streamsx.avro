@@ -14,13 +14,8 @@ STEPS=(
 FINS='cancelJobAndLog'
 
 checkOutput() {
-	local windowMarkerFile='data/Tuples'
-	case "$TTRO_variantCase" in
-	timePerMessage|bytesPerMessage)
-		windowMarkerFile='data/WindowMarker';;
-	esac
 	local tuplecount=$(grep 'typ_="t",' data/Tuples | wc -l | cut -f1 -d' ')
-	local windowcount=$(grep 'typ_="w",' "$windowMarkerFile" | wc -l | cut -f1 -d' ')
+	local windowcount=$(grep 'typ_="w",' data/Tuples | wc -l | cut -f1 -d' ')
 	printInfo "Result contains $tuplecount tuples and $windowcount windowMarker"
 	case "$TTRO_variantCase" in
 	embedAvroSchema_false|submitOnPunct)
@@ -37,6 +32,23 @@ checkOutput() {
 		if [[ $tuplecount -ne 100 ]]; then
 			setFailure "Wrong tuple counts $tuplecount"
 		fi
-		echoExecuteInterceptAndSuccess diff data/TuplesOnly data/TuplesReference;;
+		#remove seq number and window marker entries
+		{
+			while read -r; do
+				if [[ $REPLY == *,typ_=\"t\",* ]]; then
+					local lin="${REPLY#*,typ_=\"t\",}"
+					echo "$lin" >> data/TuplesOnly
+				fi
+			done
+		} < data/Tuples
+		{
+			while read -r; do
+				if [[ $REPLY == *,typ_=\"t\",* ]]; then
+					local lin="${REPLY#*,typ_=\"t\",}"
+					echo "$lin" >> data/TuplesOnlyReference
+				fi
+			done
+		} < data/TuplesReference
+		echoExecuteInterceptAndSuccess diff data/TuplesOnly data/TuplesOnlyReference;;
 	esac
 }

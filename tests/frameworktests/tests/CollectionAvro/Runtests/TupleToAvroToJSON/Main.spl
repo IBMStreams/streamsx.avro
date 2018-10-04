@@ -50,33 +50,22 @@ public composite Main {
 		() as Sink = FileSink1(ConvertToTuple) {
 			param
 				fnameTuples       : "Tuples";
-				//<embedAvroSchema_false submitOnPunct tuplesPerMessage>fnameWindowMarker : "Tuples";
-				
+				fnameWindowMarker : "Tuples";
 		}
-		// filter puncts in case and write pure tuples
-		//<timePerMessage bytesPerMessage>stream<tweetT> ConvertToTupleF as O = Custom(ConvertToTuple as I) {
-		//<timePerMessage bytesPerMessage>	logic onTuple I: submit(I, O);
-		//<timePerMessage bytesPerMessage>}
-		//<timePerMessage bytesPerMessage>() as Sink2 = FileSink1(ConvertToTupleF) {
-		//<timePerMessage bytesPerMessage>	param
-		//<timePerMessage bytesPerMessage>		fnameTuples: "TuplesOnly"; fnameWindowMarker: ""; fnameFinalMarker: "";
-		//<timePerMessage bytesPerMessage>
-		//<timePerMessage bytesPerMessage>}
 
 		// Write reference output
 		stream<tweetT> GenerateTweetPunctuated = Punctor(GenerateTweet) {
 			param
 				position: after;
-				//<tuplesPerMessage>  punctuate: (( timest != 1048298240l ) && ((timest - 1048298240l) % 11l == 10l)) || ( timest == (1048298240l + 99l));
+				//<tuplesPerMessage>  punctuate: ((timest - 1048298240l) % 11l == 10l) || ( timest == (1048298240l + 99l));
 				//<embedAvroSchema_false submitOnPunct>punctuate: timest == (1048298240l + 99l);
 				//<timePerMessage bytesPerMessage> punctuate: false;
 		}
 		() as Reference = FileSink1(GenerateTweetPunctuated) {
 			param
 				fnameTuples       : "TuplesReference";
-				//<embedAvroSchema_false submitOnPunct tuplesPerMessage>fnameWindowMarker : "TuplesReference";
+				fnameWindowMarker : "TuplesReference";
 				fnameFinalMarker  : "";
-				//<timePerMessage bytesPerMessage>addSeqToFnameTuple: false;
 		}
 		
 	config

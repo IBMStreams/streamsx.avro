@@ -26,7 +26,7 @@ checkTuples() {
 }
 
 checkContent() {
-	if ! jq -h &> /dev/zero; then
+	if ! jq --version; then
 		printError "Json tool jq not available"
 		return 0
 	fi

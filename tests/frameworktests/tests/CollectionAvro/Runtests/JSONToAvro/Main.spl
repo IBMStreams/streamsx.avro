@@ -23,10 +23,31 @@ public composite Main {
 		stream<blob avroMessage> ConvertToAvro = JSONToAvro(ConvertTupleToJson) {
 			param
 				avroMessageSchemaFile: getApplicationDir()+"/etc/twitter.avsc";
+				embedAvroSchema: true;
+				//submitOnPunct: true;
+				tuplesPerMessage: 1l;
 		}
 
 		// Write the Avro message to output file
 		() as Sink = FileSink1(ConvertToAvro) { }
+
+		// Write bin content
+		() as BinSink = FileSink(ConvertToAvro) {
+			param
+				format: block;
+				file: "AvroFile_{id}";
+				closeMode: count;
+				tuplesPerFile: 1ul;
+		}
+
+		// Write Json reference content
+		() as JsonSink = FileSink(ConvertTupleToJson) {
+			param
+				format: line;
+				file: "JsonFile_{id}";
+				closeMode: count;
+				tuplesPerFile: 1ul;
+		}
 
 	config
 		restartable : false;

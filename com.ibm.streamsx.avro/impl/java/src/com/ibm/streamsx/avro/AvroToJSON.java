@@ -51,7 +51,7 @@ import com.ibm.streams.operator.types.Blob;
 		@InputPortSet(description = "Port that ingests tuples", cardinality = 1, optional = false, windowingMode = WindowMode.NonWindowed, windowPunctuationInputMode = WindowPunctuationInputMode.Oblivious) })
 @OutputPorts({
 		@OutputPortSet(description = "Port that produces tuples", cardinality = 1, optional = false, windowPunctuationOutputMode = WindowPunctuationOutputMode.Generating) })
-@Icons(location16 = "icons/AvroToJSON_16x16.png", location32 = "icons/AvroToJSON_32x32.png")
+@Icons(location16 = "icons/AvroToJson_16.gif", location32 = "icons/AvroToJson_32.gif")
 @Libraries(value = { "opt/downloaded/*" })
 public class AvroToJSON extends AbstractOperator {
 

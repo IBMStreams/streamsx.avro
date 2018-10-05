@@ -54,7 +54,7 @@ import com.ibm.streams.operator.types.ValueFactory;
 		@InputPortSet(description = "Port that ingests JSON records", cardinality = 1, optional = false, windowingMode = WindowMode.NonWindowed, windowPunctuationInputMode = WindowPunctuationInputMode.Oblivious) })
 @OutputPorts({
 		@OutputPortSet(description = "Port that produces Avro records", cardinality = 1, optional = false, windowPunctuationOutputMode = WindowPunctuationOutputMode.Generating) })
-@Icons(location16 = "icons/JSONToAvro_16x16.png", location32 = "icons/JSONToAvro_32x32.png")
+@Icons(location16 = "icons/JsonToAvro_16.gif", location32 = "icons/JsonToAvro_32.gif")
 @Libraries(value = { "opt/downloaded/*" })
 public class JSONToAvro extends AbstractOperator {
 

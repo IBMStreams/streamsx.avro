@@ -25,8 +25,5 @@ com.ibm.streamsx.avro/impl/java/build/
 com.ibm.streamsx.avro/impl/java/studio-build/
 com.ibm.streamsx.avro/impl/java/src-gen/
 com.ibm.streamsx.avro/opt/downloaded/
-com.ibm.streamsx.avro/com.ibm.streamsx.avro/AvroToJSON/AvroToJSON.xml
-com.ibm.streamsx.avro/com.ibm.streamsx.avro/JSONToAvro/JSONToAvro.xml
-com.ibm.streamsx.avro/com.ibm.streamsx.avro/TupleToAvro/TupleToAvro.xml
 com.ibm.streamsx.avro/impl/lib/com.ibm.streamsx.avro.jar
 /.project

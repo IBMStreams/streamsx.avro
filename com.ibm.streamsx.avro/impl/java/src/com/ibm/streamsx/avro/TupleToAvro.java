@@ -52,7 +52,7 @@ import com.ibm.streamsx.avro.convert.TupleToAvroConverter;
 		@InputPortSet(description = "Port that ingests tuples", cardinality = 1, optional = false, windowingMode = WindowMode.NonWindowed, windowPunctuationInputMode = WindowPunctuationInputMode.Oblivious) })
 @OutputPorts({
 		@OutputPortSet(description = "Port that produces Avro records", cardinality = 1, optional = false, windowPunctuationOutputMode = WindowPunctuationOutputMode.Generating) })
-@Icons(location16 = "icons/TupleToAvro_16x16.png", location32 = "icons/TupleToAvro_32x32.png")
+@Icons(location16 = "icons/TupleToAvro_16.gif", location32 = "icons/TupleToAvro_32.gif")
 @Libraries(value = { "opt/downloaded/*" })
 public class TupleToAvro extends AbstractOperator {
 

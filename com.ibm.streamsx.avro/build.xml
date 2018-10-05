@@ -45,6 +45,9 @@
 			<!-- The fileset with the generated spl artifacts -->
 			<fileset dir="${basedir}">
 				<include name="com.ibm.streamsx.avro/*/*.xml"/>
+				<include name="com.ibm.streamsx.avro/AvroToJSON/*.gif"/>
+				<include name="com.ibm.streamsx.avro/JSONToAvro/*.gif"/>
+					<include name="com.ibm.streamsx.avro/TupleToAvro/*.gif"/>
 				<include name="toolkit.xml"/>
 			</fileset>
 		</delete>
@@ -81,7 +84,7 @@
 
 	<target name="toolkit" depends="jar">
 		<echo message="Tookit to index: ${basedir}" />
-		<exec executable="${spl-mt}">
+		<exec executable="${spl-mt}" failonerror="true">
 			<arg value="--directory" />
 			<arg value="${basedir}" />
 			<arg value="-m" />

@@ -16,10 +16,15 @@ public composite Main {
 			output
 				O : username = "Frank", tweet = "Hi, this is a cool tweet! "
 					+(rstring) IterationCount(), tweettime = 1048298232ul + IterationCount() ;
+			config
+				placement: partitionColocation("Loc1");
 		}
 
 		// Convert the Tweet tuple to a JSON string
-		stream<rstring jsonMessage> ConvertTupleToJson = TupleToJSON(GenerateTweet) { }
+		stream<rstring jsonMessage> ConvertTupleToJson = TupleToJSON(GenerateTweet) {
+			config
+				placement: partitionColocation("Loc1");
+		}
 
 		// Batch the incoming tuples into Avro tuples with embedded schema
 		stream<blob avroMessage> ConvertToAvro = JSONToAvro(ConvertTupleToJson) {
@@ -31,6 +36,8 @@ public composite Main {
 				//<tuplesPerMessage>      tuplesPerMessage: 11l;
 				//<timePerMessage>        timePerMessage: 1l;
 				//<bytesPerMessage>       bytesPerMessage: 1000l;
+			config
+				placement: partitionColocation("Loc1");
 		}
 		
 		/* Convert the Avro message to a JSON string */

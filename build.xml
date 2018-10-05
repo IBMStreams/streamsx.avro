@@ -19,7 +19,6 @@
 	<property name="tktitle"             value="IBMStreams ${ant.project.name} Toolkit" />
 	<property name="tkauthor"            value="IBMStreams Open Source Community at GitHub - https://github.com/IBMStreams/${ant.project.name}" />
 
-	<property name="spl-mt"              value="${env.STREAMS_INSTALL}/bin/spl-make-toolkit"/>
 	<property name="spl-md"              value="${env.STREAMS_INSTALL}/bin/spl-make-doc"/>
 	<property name="spl-st"              value="${env.STREAMS_INSTALL}/bin/streamtool"/>
 
@@ -33,9 +32,10 @@
 		<arg value="HEAD" />
 	</exec>
 	
-	<target name="all"   depends="toolkit,spldoc,samples-spldoc"
+	<target name="all"   depends="toolkit,spldoc"
 		description="Main target: Build all toolkit artifacts, toolkit documentation and samples doc - incremental build"/>
-	<target name="clean" depends="releaseinfo-clean,toolkit-clean,spldoc-clean"
+	
+	<target name="clean" depends="spldoc-clean,samples-clean,toolkit-clean,releaseinfo-clean"
 		description="Main target: Clean all generated and downloaded toolkit files, clean samples and clean the documentation"/>
 
 	<target name="toolkit"
@@ -89,7 +89,7 @@
 		</subant>
 	</target>
 
-	<target name="samples-spldoc" depends="samples"
+	<target name="spldoc-samples" depends="samples"
 		description="Generate the doc for all samples">
 		<echo message="All samples spldoc to: ${samples.doc.dir}"/>
 		<exec executable="${spl-md}">
@@ -109,42 +109,41 @@
 	
 	<target name="build-sample-target">
 		<echo message="Sample to build: ${basedir}"/>
-		<!-- <exec executable="make" failonerror="true" dir="${basedir}">
-			<arg value="all" />
-		</exec> -->
-		<exec executable="${spl-mt}" failonerror="true">
-			<arg value="--directory"/>
-			<arg value="${basedir}"/>
-			<arg value="-m"/>
-		</exec>
+		<exec executable="make" failonerror="true" dir="${basedir}"/>
 	</target>
 	
 	<target name="clean-sample-target">
 		<echo message="Sample to clean: ${basedir}"/>
-		<!-- <exec executable="make" failonerror="true" dir="${basedir}">
+		<exec executable="make" failonerror="true" dir="${basedir}">
 			<arg value="clean" />
-		</exec> -->
-		<exec executable="${spl-mt}" failonerror="true">
-			<arg value="--directory"/>
-			<arg value="${basedir}"/>
-			<arg value="--clean"/>
 		</exec>
 	</target>
 
 	<!-- Test targets -->
-	<target name="test"
+	<target name="test" depends="toolkit"
 		description="Execute the toolkit test. Requires an up to date toolkit build">
-		<echo message="TODO: implement"/>
+		<echo message="Start full test"/>
+		<exec executable="./runTest.sh" dir="${test.dir}/frameworktests" failonerror="true">
+			<arg value="--noprompt"/>
+			<arg value="--no-browser"/>
+		</exec>
 	</target>
 
-	<target name="test-quick"
+	<target name="test-quick" depends="toolkit"
 		description="Execute the toolkit quick test. Requires an up to date toolkit build">
-		<echo message="TODO: implement"/>
+		<echo message="Start quick test"/>
+		<exec executable="./runTest.sh" dir="${test.dir}/frameworktests" failonerror="true">
+			<arg value="--noprompt"/>
+			<arg value="--no-browser"/>
+			<arg value="--category"/>
+			<arg value="quick"/>
+		</exec>
 	</target>
 
 	<target name="test-clean"
 		description="Clean up all generated test artifacts">
-		<echo message="TODO: implement"/>
+		<delete dir="${test.dir}/frameworktests/workdir"/>
+		<delete dir="${test.dir}/frameworktests/scripts"/>
 	</target>
 	
 	<!-- Targets to build releases -->
@@ -167,7 +166,6 @@
 			includes="${toolkit.dir}/** ${samples.dir}/** ${doc.string}/** README.md LICENSE"
 			excludes="**/.toolkitList **/.gitignore ${toolkit.dir}/.settings/ ${toolkit.dir}/.project ${toolkit.dir}/.classpath ${toolkit.dir}/build.xml ${toolkit.dir}/pom.xml ${toolkit.dir}/icons/ ${toolkit.dir}/impl/java/"
 		/>
-		
 		<checksum file="${releasefilename}"/>
 		<checksum algorithm="sha1" file="${releasefilename}"/>
 	</target>

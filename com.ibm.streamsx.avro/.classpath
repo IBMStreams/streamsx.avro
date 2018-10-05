@@ -1,8 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" output="impl/java/studio-build" path="impl/java/src"/>
-	<classpathentry exported="true" kind="lib" path="opt/downloaded/avro-1.8.1.jar"/>
 	<classpathentry kind="con" path="com.ibm.streams.java/com.ibm.streams.operator"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="opt/downloaded/avro-1.8.2.jar"/>
+	<classpathentry kind="lib" path="opt/downloaded/commons-compress-1.8.1.jar"/>
+	<classpathentry kind="lib" path="opt/downloaded/jackson-core-asl-1.9.13.jar"/>
+	<classpathentry kind="lib" path="opt/downloaded/jackson-mapper-asl-1.9.13.jar"/>
+	<classpathentry kind="lib" path="opt/downloaded/paranamer-2.7.jar"/>
+	<classpathentry kind="lib" path="opt/downloaded/slf4j-api-1.7.7.jar"/>
+	<classpathentry kind="lib" path="opt/downloaded/snappy-java-1.1.1.3.jar"/>
+	<classpathentry kind="lib" path="opt/downloaded/xz-1.5.jar"/>
 	<classpathentry kind="output" path="impl/java/studio-build"/>
 </classpath>

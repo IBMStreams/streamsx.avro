@@ -39,8 +39,8 @@ checkWindowMarker() {
 	case "$TTRO_variantCase" in
 	timePerMessage)
 		local count=$(wc -l data/WindowMarker | cut -f1 -d' ')
-		if [[ $count -lt 5 ]]; then
-			setFailure "Number of received window marker is less 5. Count is: $count"
+		if [[ $count -lt 8 ]]; then
+			setFailure "Number of received window marker is less 8. Count is: $count"
 		else
 			printInfo "Received window marker count: $count"
 		fi;;

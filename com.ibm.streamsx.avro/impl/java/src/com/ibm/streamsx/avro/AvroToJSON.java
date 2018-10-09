@@ -1,6 +1,6 @@
 //
 // *******************************************************************************
-// * Copyright (C)2016, International Business Machines Corporation and *
+// * Copyright (C)2018, International Business Machines Corporation and *
 // * others. All Rights Reserved. *
 // *******************************************************************************
 //
@@ -21,12 +21,14 @@ import org.apache.avro.io.DecoderFactory;
 import org.apache.log4j.Logger;
 
 import com.ibm.streams.operator.AbstractOperator;
+import com.ibm.streams.operator.Attribute;
 import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.OutputTuple;
 import com.ibm.streams.operator.StreamSchema;
 import com.ibm.streams.operator.StreamingInput;
 import com.ibm.streams.operator.StreamingOutput;
 import com.ibm.streams.operator.Tuple;
+import com.ibm.streams.operator.Type.MetaType;
 import com.ibm.streams.operator.log4j.TraceLevel;
 import com.ibm.streams.operator.model.InputPortSet;
 import com.ibm.streams.operator.model.InputPortSet.WindowMode;
@@ -48,9 +50,9 @@ import com.ibm.streams.operator.types.Blob;
 
 @PrimitiveOperator(name = "AvroToJSON", namespace = "com.ibm.streamsx.avro", description = AvroToJSON.DESC)
 @InputPorts({
-		@InputPortSet(description = "Port that ingests tuples", cardinality = 1, optional = false, windowingMode = WindowMode.NonWindowed, windowPunctuationInputMode = WindowPunctuationInputMode.Oblivious) })
+		@InputPortSet(description = "Port that receives the Apache Avro data blocks. Window punctuation markers are passed to the output port.", cardinality = 1, optional = false, windowingMode = WindowMode.NonWindowed, windowPunctuationInputMode = WindowPunctuationInputMode.Oblivious) })
 @OutputPorts({
-		@OutputPortSet(description = "Port that produces tuples", cardinality = 1, optional = false, windowPunctuationOutputMode = WindowPunctuationOutputMode.Generating) })
+		@OutputPortSet(description = "Port that produces tuples with the JSON message string and optionally with the JSON key string. Window punctuation markers are forwarded from the input port.", cardinality = 1, optional = false, windowPunctuationOutputMode = WindowPunctuationOutputMode.Generating) })
 @Icons(location16 = "icons/AvroToJson_16.gif", location32 = "icons/AvroToJson_32.gif")
 @Libraries(value = { "opt/downloaded/*" })
 public class AvroToJSON extends AbstractOperator {
@@ -102,7 +104,7 @@ public class AvroToJSON extends AbstractOperator {
 		this.avroKeySchemaFile = avroKeySchemaFile;
 	}
 
-	@Parameter(optional = true, description = "Is the Avro schema embedded in the input Avro blob(s)?")
+	@Parameter(optional = true, description = "Is the Avro schema embedded in the input Avro blob(s)? Default is `false`")
 	public void setAvroSchemaEmbedded(boolean avroSchemaEmbedded) {
 		this.avroSchemaEmbedded = avroSchemaEmbedded;
 	}
@@ -137,10 +139,9 @@ public class AvroToJSON extends AbstractOperator {
 
 		// If no Avro key attribute specified, check if optional attribute is
 		// available in the input tuple
-		if (inputAvroKey == null) {
+		if (inputAvroKey == null)
 			if (ssIp0.getAttribute(DEFAULT_INPUT_AVRO_KEY_ATTRIBUTE) != null)
 				inputAvroKey = DEFAULT_INPUT_AVRO_KEY_ATTRIBUTE;
-		}
 		if (inputAvroKey != null)
 			LOGGER.log(TraceLevel.TRACE, "Input Avro key attribute: " + inputAvroKey);
 
@@ -153,15 +154,35 @@ public class AvroToJSON extends AbstractOperator {
 			}
 		}
 		LOGGER.log(TraceLevel.TRACE, "Output JSON message attribute: " + outputJsonMessage);
+		Attribute outputJsonMessageAttribute = ssOp0.getAttribute(outputJsonMessage);
+		if (outputJsonMessageAttribute == null) {
+			throw new IllegalArgumentException("No outputJsonMessage attribute `" + outputJsonMessage + "` found in output stream");
+		} else {
+			MetaType paramType = outputJsonMessageAttribute.getType().getMetaType();
+			if(paramType!=MetaType.USTRING && paramType!=MetaType.RSTRING) {
+				throw new IllegalArgumentException("outputJsonMessage attribute `" + outputJsonMessage + "` must have a rstring or ustring type");
+			}
+		}
 
 		// If no JSON key attribute specified, check if optional attribute is
 		// available in the output tuple
 		if (outputJsonKey == null) {
-			if (ssIp0.getAttribute(DEFAULT_OUTPUT_JSON_KEY_ATTRIBUTE) != null)
+			if (ssIp0.getAttribute(DEFAULT_OUTPUT_JSON_KEY_ATTRIBUTE) != null) {
 				outputJsonKey = DEFAULT_OUTPUT_JSON_KEY_ATTRIBUTE;
+			}
 		}
-		if (outputJsonKey != null)
+		if (outputJsonKey != null) {
 			LOGGER.log(TraceLevel.TRACE, "Output JSON key attribute: " + outputJsonKey);
+			Attribute attribute = ssOp0.getAttribute(outputJsonKey);
+			if (attribute == null) {
+				throw new IllegalArgumentException("No outputJsonKey attribute `" + outputJsonKey + "` found in output stream");
+			} else {
+				MetaType paramType = attribute.getType().getMetaType();
+				if(paramType!=MetaType.USTRING && paramType!=MetaType.RSTRING) {
+					throw new IllegalArgumentException("outputJsonKey attribute " + outputJsonKey + " must have a rstring or ustring type");
+				}
+			}
+		}
 
 		// Get the Avro message schema file to parse the Avro messages
 		if (!avroMessageSchemaFile.isEmpty()) {
@@ -177,12 +198,9 @@ public class AvroToJSON extends AbstractOperator {
 			keySchema = new Schema.Parser().parse(avscKeyInput);
 		}
 
-		// If the schema is embedded in the message, the schema file must not be
-		// specified
+		// If the schema is embedded in the message, the schema file must not be specified
 		if (avroSchemaEmbedded && !avroMessageSchemaFile.isEmpty())
-			throw new Exception(
-					"Parameter avroMessageSchema cannot be specified if the schema is embedded in the message.");
-
+			throw new IllegalArgumentException("Parameter avroMessageSchema cannot be specified if the schema is embedded in the message.");
 		LOGGER.log(TraceLevel.TRACE, "AvroToJSON operator initialized, ready to receive tuples");
 
 	}
@@ -299,7 +317,7 @@ public class AvroToJSON extends AbstractOperator {
 		dataFileReader.close();
 	}
 
-	static final String DESC = "This operator binary Avro messages and optionally message keys into a JSON string."
-			+ " If an invalid Avro message or key is found in the input, the operator will fail.";
+	static final String DESC = "This operator converts binary Avro messages and optionally message keys into a JSON string."
+			+ " If an invalid Avro message or key is found in the input, the operator will not produce an output tuple.";
 
 }

@@ -51,7 +51,7 @@
 	<target name="spldoc" depends="toolkit"
 		description="Generate the toolkit documentation">
 		<echo message="Tookit spldoc to: ${doc.dir}"/>
-		<exec executable="${spl-md}">
+		<exec executable="${spl-md}" failonerror="true">
 			<arg value="--include-composite-operator-diagram" />
 			<arg value="--author" />
 			<arg value="${tkauthor}" />
@@ -92,7 +92,7 @@
 	<target name="spldoc-samples" depends="samples"
 		description="Generate the doc for all samples">
 		<echo message="All samples spldoc to: ${samples.doc.dir}"/>
-		<exec executable="${spl-md}">
+		<exec executable="${spl-md}" failonerror="true">
 			<arg value="--include-composite-operator-diagram"/>
 			<arg value="--author"/>
 			<arg value="${tkauthor}"/>

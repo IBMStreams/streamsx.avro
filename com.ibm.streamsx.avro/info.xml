@@ -2,7 +2,13 @@
 <info:toolkitInfoModel xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common" xmlns:info="http://www.ibm.com/xmlns/prod/streams/spl/toolkitInfo">
   <info:identity>
     <info:name>com.ibm.streamsx.avro</info:name>
-    <info:description>This toolkit provides SerDes for Apache Avro</info:description>
+    <info:description>
+        This toolkit supports serialization and deserialization of messages in an Apache Avro format. 
+        It provides the operators `AvroToJSON`, `JSONToAvro` and TupleToAvro, which respectively are used to convert an Avro message 
+        (with or without embedded schema) to a JSON string or a Tuple and a JSON string into an Avro message 
+        (or a block of Avro messages with embedded schema). Avro messages are in a binary format, hence they are 
+        represented as a Streams `blob` type.
+    </info:description>
     <info:version>1.1.2.__dev__</info:version>
     <info:requiredProductVersion>4.2.0.0</info:requiredProductVersion>
   </info:identity>

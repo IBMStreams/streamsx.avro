@@ -29,7 +29,9 @@ import com.ibm.streams.operator.StreamSchema;
 import com.ibm.streams.operator.StreamingInput;
 import com.ibm.streams.operator.StreamingOutput;
 import com.ibm.streams.operator.Tuple;
+import com.ibm.streams.operator.OperatorContext.ContextCheck;
 import com.ibm.streams.operator.StreamingData.Punctuation;
+import com.ibm.streams.operator.compile.OperatorContextChecker;
 import com.ibm.streams.operator.log4j.TraceLevel;
 import com.ibm.streams.operator.model.InputPortSet;
 import com.ibm.streams.operator.model.InputPortSet.WindowMode;
@@ -39,6 +41,7 @@ import com.ibm.streams.operator.model.InputPorts;
 import com.ibm.streams.operator.model.OutputPortSet;
 import com.ibm.streams.operator.model.Libraries;
 import com.ibm.streams.operator.model.OutputPortSet.WindowPunctuationOutputMode;
+import com.ibm.streams.operator.state.ConsistentRegionContext;
 import com.ibm.streams.operator.model.OutputPorts;
 import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.model.PrimitiveOperator;
@@ -49,7 +52,7 @@ import com.ibm.streams.operator.types.ValueFactory;
  * 
  */
 
-@PrimitiveOperator(name = "JSONToAvro", namespace = "com.ibm.streamsx.avro", description = JSONToAvro.DESC)
+@PrimitiveOperator(name = JSONToAvro.OPER_NAME, namespace = "com.ibm.streamsx.avro", description = JSONToAvro.DESC)
 @InputPorts({
 		@InputPortSet(description = "Port that ingests JSON records", cardinality = 1, optional = false, windowingMode = WindowMode.NonWindowed, windowPunctuationInputMode = WindowPunctuationInputMode.Oblivious) })
 @OutputPorts({
@@ -58,7 +61,9 @@ import com.ibm.streams.operator.types.ValueFactory;
 @Libraries(value = { "opt/downloaded/*" })
 public class JSONToAvro extends AbstractOperator {
 
-	private static Logger LOGGER = Logger.getLogger(JSONToAvro.class);
+	public static final String OPER_NAME = "JSONToAvro";
+	
+	private static Logger tracer = Logger.getLogger(JSONToAvro.class.getName());
 
 	private String inputJsonMessage = null;
 	private final String DEFAULT_INPUT_JSON_MSG_ATTRIBUTE = "jsonMessage";
@@ -148,6 +153,19 @@ public class JSONToAvro extends AbstractOperator {
 	int numberOfBatchedMessages = 0;
 
 	/**
+	 * Compile time operator checks: Do not use the operator in a consistent region
+	 * @param checker
+	 *            The operator context
+	 */
+	@ContextCheck(compile = true)
+	public static void checkInConsistentRegion(OperatorContextChecker checker) {
+		ConsistentRegionContext consistentRegionContext = checker.getOperatorContext().getOptionalContext(ConsistentRegionContext.class);
+		if(consistentRegionContext != null) {
+			checker.setInvalidContext(OPER_NAME + " operator cannot be used inside a consistent region", new Object[]{});
+		}
+	}
+	
+	/**
 	 * Initialize this operator. Called once before any tuples are processed.
 	 * 
 	 * @param operatorContext
@@ -159,7 +177,7 @@ public class JSONToAvro extends AbstractOperator {
 	public synchronized void initialize(OperatorContext operatorContext) throws Exception {
 		// Must call super.initialize(context) to correctly setup an operator.
 		super.initialize(operatorContext);
-		LOGGER.log(TraceLevel.TRACE, "Operator " + operatorContext.getName() + " initializing in PE: "
+		tracer.log(TraceLevel.TRACE, "Operator " + operatorContext.getName() + " initializing in PE: "
 				+ operatorContext.getPE().getPEId() + " in Job: " + operatorContext.getPE().getJobId());
 
 		StreamSchema ssOp0 = getOutput(0).getStreamSchema();
@@ -173,7 +191,7 @@ public class JSONToAvro extends AbstractOperator {
 				inputJsonMessage = DEFAULT_INPUT_JSON_MSG_ATTRIBUTE;
 			}
 		}
-		LOGGER.log(TraceLevel.TRACE, "Input JSON message attribute: " + inputJsonMessage);
+		tracer.log(TraceLevel.TRACE, "Input JSON message attribute: " + inputJsonMessage);
 
 		// If no output Avro message attribute specified, use default
 		if (outputAvroMessage == null) {
@@ -183,17 +201,17 @@ public class JSONToAvro extends AbstractOperator {
 				outputAvroMessage = DEFAULT_OUTPUT_AVRO_MSG_ATTRIBUTE;
 			}
 		}
-		LOGGER.log(TraceLevel.TRACE, "Output Avro message attribute: " + outputAvroMessage);
+		tracer.log(TraceLevel.TRACE, "Output Avro message attribute: " + outputAvroMessage);
 
 		// Get the Avro schema file to parse the Avro messages
-		LOGGER.log(TraceLevel.TRACE, "Retrieving and parsing Avro message schema file " + avroMessageSchemaFile);
+		tracer.log(TraceLevel.TRACE, "Retrieving and parsing Avro message schema file " + avroMessageSchemaFile);
 		InputStream avscInput = new FileInputStream(avroMessageSchemaFile);
 		Schema.Parser parser = new Schema.Parser();
 		messageSchema = parser.parse(avscInput);
 
-		LOGGER.log(TraceLevel.TRACE, "Embed Avro schema in generated output Avro message block: " + embedAvroSchema);
-		LOGGER.log(TraceLevel.TRACE, "Submit Avro message block when punctuation is received: " + submitOnPunct);
-		LOGGER.log(TraceLevel.TRACE, "Ignore parsing error: " + ignoreParsingError);
+		tracer.log(TraceLevel.TRACE, "Embed Avro schema in generated output Avro message block: " + embedAvroSchema);
+		tracer.log(TraceLevel.TRACE, "Submit Avro message block when punctuation is received: " + submitOnPunct);
+		tracer.log(TraceLevel.TRACE, "Ignore parsing error: " + ignoreParsingError);
 
 		// submitOnPunct is only valid if Avro schema is embedded in the output
 		if (submitOnPunct && !embedAvroSchema)
@@ -213,7 +231,7 @@ public class JSONToAvro extends AbstractOperator {
 			avroDataFileWriter.create(messageSchema, avroBlockByteArray);
 		numberOfBatchedMessages = 0;
 
-		LOGGER.log(TraceLevel.TRACE, "JSONToAvro operator initialized, ready to receive tuples");
+		tracer.log(TraceLevel.TRACE, "JSONToAvro operator initialized, ready to receive tuples");
 
 	}
 
@@ -225,8 +243,8 @@ public class JSONToAvro extends AbstractOperator {
 
 		String jsonInput = tuple.getString(inputJsonMessage);
 
-		if (LOGGER.isTraceEnabled())
-			LOGGER.log(TraceLevel.TRACE, "Input JSON string: " + jsonInput);
+		if (tracer.isTraceEnabled())
+			tracer.log(TraceLevel.TRACE, "Input JSON string: " + jsonInput);
 
 		// Create a new tuple for output port 0 and copy over any matching
 		// attributes
@@ -261,7 +279,7 @@ public class JSONToAvro extends AbstractOperator {
 				submitAvroToOuput();
 			}
 		} catch (Exception e) {
-			LOGGER.log(TraceLevel.ERROR, "Error while converting JSON string to AVRO schema: " + e.getMessage()
+			tracer.log(TraceLevel.ERROR, "Error while converting JSON string to AVRO schema: " + e.getMessage()
 					+ ". JSON String: " + jsonInput);
 			// If parsing errors must not be ignored, make the operator fail
 			if (!ignoreParsingError)
@@ -275,8 +293,8 @@ public class JSONToAvro extends AbstractOperator {
 		// Send block of messages with Avro schema included and punctuation
 		if (embedAvroSchema) {
 			if (numberOfBatchedMessages > 0) {
-				if (LOGGER.isTraceEnabled())
-					LOGGER.log(TraceLevel.TRACE, "Submitting " + numberOfBatchedMessages
+				if (tracer.isTraceEnabled())
+					tracer.log(TraceLevel.TRACE, "Submitting " + numberOfBatchedMessages
 							+ " Avro messages with a total length of " + avroBlockByteArray.size() + " bytes");
 				outTuple.setBlob(outputAvroMessage, ValueFactory.newBlob(avroBlockByteArray.toByteArray()));
 				outStream.submit(outTuple);
@@ -289,8 +307,8 @@ public class JSONToAvro extends AbstractOperator {
 				numberOfBatchedMessages = 0;
 			}
 		} else { // Send individual message
-			if (LOGGER.isTraceEnabled())
-				LOGGER.log(TraceLevel.TRACE,
+			if (tracer.isTraceEnabled())
+				tracer.log(TraceLevel.TRACE,
 						"Submitting Avro message with length " + avroMessageByteArray.size() + " bytes");
 			outTuple.setBlob(outputAvroMessage, ValueFactory.newBlob(avroMessageByteArray.toByteArray()));
 			outStream.submit(outTuple);
@@ -319,6 +337,7 @@ public class JSONToAvro extends AbstractOperator {
 	}
 
 	static final String DESC = "This operator converts JSON strings into binary Avro messages."
-			+ " If an invalid JSON string is found in the input, the operator will fail.";
+			+ " If an invalid JSON string is found in the input, the operator will fail."
+			+ " This operator must not be used inside a consistent region.";
 
 }

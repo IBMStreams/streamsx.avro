@@ -23,12 +23,14 @@ import org.apache.log4j.Logger;
 import com.ibm.streams.operator.AbstractOperator;
 import com.ibm.streams.operator.Attribute;
 import com.ibm.streams.operator.OperatorContext;
+import com.ibm.streams.operator.OperatorContext.ContextCheck;
 import com.ibm.streams.operator.OutputTuple;
 import com.ibm.streams.operator.StreamSchema;
 import com.ibm.streams.operator.StreamingInput;
 import com.ibm.streams.operator.StreamingOutput;
 import com.ibm.streams.operator.Tuple;
 import com.ibm.streams.operator.Type.MetaType;
+import com.ibm.streams.operator.compile.OperatorContextChecker;
 import com.ibm.streams.operator.log4j.TraceLevel;
 import com.ibm.streams.operator.model.InputPortSet;
 import com.ibm.streams.operator.model.InputPortSet.WindowMode;
@@ -41,6 +43,7 @@ import com.ibm.streams.operator.model.OutputPortSet.WindowPunctuationOutputMode;
 import com.ibm.streams.operator.model.OutputPorts;
 import com.ibm.streams.operator.model.Parameter;
 import com.ibm.streams.operator.model.PrimitiveOperator;
+import com.ibm.streams.operator.state.ConsistentRegionContext;
 import com.ibm.streams.operator.types.Blob;
 
 /**
@@ -48,7 +51,7 @@ import com.ibm.streams.operator.types.Blob;
  * 
  */
 
-@PrimitiveOperator(name = "AvroToJSON", namespace = "com.ibm.streamsx.avro", description = AvroToJSON.DESC)
+@PrimitiveOperator(name = AvroToJSON.OPER_NAME, namespace = "com.ibm.streamsx.avro", description = AvroToJSON.DESC)
 @InputPorts({
 		@InputPortSet(description = "Port that receives the Apache Avro data blocks. Window punctuation markers are passed to the output port.", cardinality = 1, optional = false, windowingMode = WindowMode.NonWindowed, windowPunctuationInputMode = WindowPunctuationInputMode.Oblivious) })
 @OutputPorts({
@@ -57,7 +60,9 @@ import com.ibm.streams.operator.types.Blob;
 @Libraries(value = { "opt/downloaded/*" })
 public class AvroToJSON extends AbstractOperator {
 
-	private static Logger LOGGER = Logger.getLogger(AvroToJSON.class);
+	public static final String OPER_NAME = "AvroToJSON";
+	
+	private static Logger tracer = Logger.getLogger(AvroToJSON.class.getName());
 
 	private String inputAvroMessage = null;
 	private final String DEFAULT_INPUT_AVRO_MSG_ATTRIBUTE = "avroMessage";
@@ -110,6 +115,19 @@ public class AvroToJSON extends AbstractOperator {
 	}
 
 	/**
+	 * Compile time operator checks: Do not use the operator in a consistent region
+	 * @param checker
+	 *            The operator context
+	 */
+	@ContextCheck(compile = true)
+	public static void checkInConsistentRegion(OperatorContextChecker checker) {
+		ConsistentRegionContext consistentRegionContext = checker.getOperatorContext().getOptionalContext(ConsistentRegionContext.class);
+		if(consistentRegionContext != null) {
+			checker.setInvalidContext(OPER_NAME + " operator cannot be used inside a consistent region", new Object[]{});
+		}
+	}
+
+	/**
 	 * Initialize this operator. Called once before any tuples are processed.
 	 * 
 	 * @param operatorContext
@@ -121,7 +139,7 @@ public class AvroToJSON extends AbstractOperator {
 	public synchronized void initialize(OperatorContext operatorContext) throws Exception {
 		// Must call super.initialize(context) to correctly setup an operator.
 		super.initialize(operatorContext);
-		LOGGER.log(TraceLevel.TRACE, "Operator " + operatorContext.getName() + " initializing in PE: "
+		tracer.log(TraceLevel.TRACE, "Operator " + operatorContext.getName() + " initializing in PE: "
 				+ operatorContext.getPE().getPEId() + " in Job: " + operatorContext.getPE().getJobId());
 
 		StreamSchema ssOp0 = getOutput(0).getStreamSchema();
@@ -135,7 +153,7 @@ public class AvroToJSON extends AbstractOperator {
 				inputAvroMessage = DEFAULT_INPUT_AVRO_MSG_ATTRIBUTE;
 			}
 		}
-		LOGGER.log(TraceLevel.TRACE, "Input Avro message attribute: " + inputAvroMessage);
+		tracer.log(TraceLevel.TRACE, "Input Avro message attribute: " + inputAvroMessage);
 
 		// If no Avro key attribute specified, check if optional attribute is
 		// available in the input tuple
@@ -143,7 +161,7 @@ public class AvroToJSON extends AbstractOperator {
 			if (ssIp0.getAttribute(DEFAULT_INPUT_AVRO_KEY_ATTRIBUTE) != null)
 				inputAvroKey = DEFAULT_INPUT_AVRO_KEY_ATTRIBUTE;
 		if (inputAvroKey != null)
-			LOGGER.log(TraceLevel.TRACE, "Input Avro key attribute: " + inputAvroKey);
+			tracer.log(TraceLevel.TRACE, "Input Avro key attribute: " + inputAvroKey);
 
 		// If no output JSON message attribute specified, use default
 		if (outputJsonMessage == null) {
@@ -153,7 +171,7 @@ public class AvroToJSON extends AbstractOperator {
 				outputJsonMessage = DEFAULT_OUTPUT_JSON_MSG_ATTRIBUTE;
 			}
 		}
-		LOGGER.log(TraceLevel.TRACE, "Output JSON message attribute: " + outputJsonMessage);
+		tracer.log(TraceLevel.TRACE, "Output JSON message attribute: " + outputJsonMessage);
 		Attribute outputJsonMessageAttribute = ssOp0.getAttribute(outputJsonMessage);
 		if (outputJsonMessageAttribute == null) {
 			throw new IllegalArgumentException("No outputJsonMessage attribute `" + outputJsonMessage + "` found in output stream");
@@ -172,7 +190,7 @@ public class AvroToJSON extends AbstractOperator {
 			}
 		}
 		if (outputJsonKey != null) {
-			LOGGER.log(TraceLevel.TRACE, "Output JSON key attribute: " + outputJsonKey);
+			tracer.log(TraceLevel.TRACE, "Output JSON key attribute: " + outputJsonKey);
 			Attribute attribute = ssOp0.getAttribute(outputJsonKey);
 			if (attribute == null) {
 				throw new IllegalArgumentException("No outputJsonKey attribute `" + outputJsonKey + "` found in output stream");
@@ -186,14 +204,14 @@ public class AvroToJSON extends AbstractOperator {
 
 		// Get the Avro message schema file to parse the Avro messages
 		if (!avroMessageSchemaFile.isEmpty()) {
-			LOGGER.log(TraceLevel.TRACE, "Retrieving and parsing Avro message schema file " + avroMessageSchemaFile);
+			tracer.log(TraceLevel.TRACE, "Retrieving and parsing Avro message schema file " + avroMessageSchemaFile);
 			InputStream avscMessageInput = new FileInputStream(avroMessageSchemaFile);
 			messageSchema = new Schema.Parser().parse(avscMessageInput);
 		}
 
 		// Get the Avro key schema file to parse the Avro messages
 		if (!avroKeySchemaFile.isEmpty()) {
-			LOGGER.log(TraceLevel.TRACE, "Retrieving and parsing Avro key schema file " + avroKeySchemaFile);
+			tracer.log(TraceLevel.TRACE, "Retrieving and parsing Avro key schema file " + avroKeySchemaFile);
 			InputStream avscKeyInput = new FileInputStream(avroKeySchemaFile);
 			keySchema = new Schema.Parser().parse(avscKeyInput);
 		}
@@ -201,7 +219,7 @@ public class AvroToJSON extends AbstractOperator {
 		// If the schema is embedded in the message, the schema file must not be specified
 		if (avroSchemaEmbedded && !avroMessageSchemaFile.isEmpty())
 			throw new IllegalArgumentException("Parameter avroMessageSchema cannot be specified if the schema is embedded in the message.");
-		LOGGER.log(TraceLevel.TRACE, "AvroToJSON operator initialized, ready to receive tuples");
+		tracer.log(TraceLevel.TRACE, "AvroToJSON operator initialized, ready to receive tuples");
 
 	}
 
@@ -219,14 +237,14 @@ public class AvroToJSON extends AbstractOperator {
 
 		// Get the incoming binary Avro message record(s)
 		Blob avroMessage = tuple.getBlob(inputAvroMessage);
-		if (LOGGER.isTraceEnabled())
-			LOGGER.log(TraceLevel.TRACE, "Processing Avro message with length " + avroMessage.getLength());
+		if (tracer.isTraceEnabled())
+			tracer.log(TraceLevel.TRACE, "Processing Avro message with length " + avroMessage.getLength());
 		// Get the incoming binary Avro key (if specified)
 		Blob avroKey = null;
 		if (inputAvroKey != null) {
 			avroKey = tuple.getBlob(inputAvroKey);
-			if (LOGGER.isTraceEnabled())
-				LOGGER.log(TraceLevel.TRACE, "Processing Avro key with length " + avroKey.getLength());
+			if (tracer.isTraceEnabled())
+				tracer.log(TraceLevel.TRACE, "Processing Avro key with length " + avroKey.getLength());
 		}
 
 		// Submit JSON tuples based on the Avro content received in the Blob
@@ -267,8 +285,8 @@ public class AvroToJSON extends AbstractOperator {
 		ByteArrayInputStream consumedByteArray = new ByteArrayInputStream(avroMessage.getData());
 		Decoder consumedDecoder = DecoderFactory.get().binaryDecoder(consumedByteArray, null);
 		GenericRecord consumedDatum = consumer.read(null, consumedDecoder);
-		if (LOGGER.isTraceEnabled())
-			LOGGER.log(TraceLevel.TRACE, "JSON representation of Avro message: " + consumedDatum.toString());
+		if (tracer.isTraceEnabled())
+			tracer.log(TraceLevel.TRACE, "JSON representation of Avro message: " + consumedDatum.toString());
 		outTuple.setString(outputJsonMessage, consumedDatum.toString());
 		// Deserialize key (if specified)
 		if (avroKey != null) {
@@ -276,8 +294,8 @@ public class AvroToJSON extends AbstractOperator {
 			consumedByteArray = new ByteArrayInputStream(avroKey.getData());
 			consumedDecoder = DecoderFactory.get().binaryDecoder(consumedByteArray, null);
 			consumedDatum = consumer.read(null, consumedDecoder);
-			if (LOGGER.isTraceEnabled())
-				LOGGER.log(TraceLevel.TRACE, "JSON representation of Avro key: " + consumedDatum.toString());
+			if (tracer.isTraceEnabled())
+				tracer.log(TraceLevel.TRACE, "JSON representation of Avro key: " + consumedDatum.toString());
 			if (outputJsonKey != null)
 				outTuple.setString(outputJsonKey, consumedDatum.toString());
 		}
@@ -307,8 +325,8 @@ public class AvroToJSON extends AbstractOperator {
 		GenericRecord consumedDatum = null;
 		while (dataFileReader.hasNext()) {
 			consumedDatum = dataFileReader.next(consumedDatum);
-			if (LOGGER.isTraceEnabled())
-				LOGGER.log(TraceLevel.TRACE, "JSON representation of Avro message: " + consumedDatum.toString());
+			if (tracer.isTraceEnabled())
+				tracer.log(TraceLevel.TRACE, "JSON representation of Avro message: " + consumedDatum.toString());
 			// Submit new tuple to output port 0
 			outTuple.setString(outputJsonMessage, consumedDatum.toString());
 			outStream.submit(outTuple);
@@ -318,6 +336,7 @@ public class AvroToJSON extends AbstractOperator {
 	}
 
 	static final String DESC = "This operator converts binary Avro messages and optionally message keys into a JSON string."
-			+ " If an invalid Avro message or key is found in the input, the operator will not produce an output tuple.";
+			+ " If an invalid Avro message or key is found in the input, the operator will not produce an output tuple."
+			+ " This operator must not be used inside a consistent region.";
 
 }

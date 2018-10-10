@@ -1,0 +1,39 @@
+use com.ibm.streamsx.avro::*;
+use com.ibm.streamsx.json::TupleToJSON;
+use com.ibm.streamsx.testframe::FileSink1;
+
+public composite Main {
+	graph
+		() as JCP = JobControlPlane() {}
+		
+		@consistent(trigger=periodic,period=100.0)
+		//<AvroToJSON>stream<blob avroBlob> Input = FileSource() {
+		//<AvroToJSON>	param
+		//<AvroToJSON>		file : getApplicationDir()+"/etc/twitter.avro";
+		//<AvroToJSON>		format : block;
+		//<AvroToJSON>		blockSize : 3000u;
+		//<!AvroToJSON>stream<rstring username, rstring tweet, uint64 tweettime> Input as O = Beacon() {
+		//<!AvroToJSON>	param
+		//<!AvroToJSON>		iterations : 100u ;
+		//<!AvroToJSON>	output
+		//<!AvroToJSON>		O : username = "Frank", tweet = "Hi, this is a cool tweet! "+(rstring)IterationCount(), tweettime = 1048298232ul + IterationCount() ;
+		}
+
+		//<JSONToAvro>stream<rstring jsonMessage> Input2 = TupleToJSON(Input) {}
+		
+		//<AvroToJSON>stream<rstring jsonMessage> Output = AvroToJSON(Input) {
+		//<AvroToJSON>	param avroSchemaEmbedded: true;
+		//<JSONToAvro>stream<blob avroMessage> Output = JSONToAvro(Input2) {
+		//<TupleToAvro>stream<blob avroMessage> Output = TupleToAvro(Input) {
+		//<!AvroToJSON>	param
+		//<!AvroToJSON>		avroMessageSchemaFile: getApplicationDir()+"/etc/twitter.avsc";
+		//<!AvroToJSON>		embedAvroSchema: true;
+		//<!AvroToJSON>		submitOnPunct: true;
+		}
+		
+		@autonomous
+		() as Sink = FileSink1(Output) { }
+	
+	config
+		restartable : false;
+}

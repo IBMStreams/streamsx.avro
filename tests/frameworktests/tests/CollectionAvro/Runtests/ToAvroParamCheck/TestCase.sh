@@ -1,4 +1,4 @@
-#--variantList='JsonEmbedAvroSchema_true JsonEmbedAvroSchema_false TupleEmbedAvroSchema_true TupleEmbedAvroSchema_false'
+#--variantList='jsonInputNoJsonMessage jsonInputTypeWrong tupleInputTypeWrong jsonOutputAttrNotExists tupleOutputAttrNotExists jsonOutputAttrNoBlob tupleOutputAttrNoBlob'
 
 PREPS='copyAndMorphSpl'
 
@@ -8,12 +8,35 @@ STEPS=(
 	'checkOutput'
 )
 
+case "$TTRO_variantCase" in
+	jsonInputNoJsonMessage)
+		StreamsOperator='JSONToAvro';  InputStream='GenerateTweet';;
+	jsonInputTypeWrong)
+		StreamsOperator='JSONToAvro';  InputStream='GenerateTweet';;
+	tupleInputTypeWrong)
+		StreamsOperator='TupleToAvro'; InputStream='GenerateTweet';;
+	jsonOutputAttrNotExists)
+		StreamsOperator='JSONToAvro';  InputStream='ConvertTupleToJson';;
+	tupleOutputAttrNotExists)
+		StreamsOperator='TupleToAvro'; InputStream='GenerateTweet';;
+	jsonOutputAttrNoBlob)
+		StreamsOperator='JSONToAvro';  InputStream='ConvertTupleToJson';;
+	tupleOutputAttrNoBlob)
+		StreamsOperator='TupleToAvro'; InputStream='GenerateTweet';;
+esac
+
 checkOutput() {
 	case "$TTRO_variantCase" in
-	*EmbedAvroSchema_true)
-		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" "*ERROR*If Avro schema is embedded in the output, you must specify one of the thresholds when the tuple must be submitted (submitOnPunct, bytesPerMessage, timePerMessage, tuplesPerMessage).*";;
-	*EmbedAvroSchema_false)
-		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" "*ERROR*Parameter submitOnPunct can only be set to true if Avro schema is embedded in the output.";;
+	jsonInputNoJsonMessage)
+		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" '*ERROR*java.lang.IllegalArgumentException: No inputJsonMessage attribute `jsonMessage` found in input stream.*';;
+	jsonInputTypeWrong)
+		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" '*ERROR*java.lang.IllegalArgumentException: inputJsonMessage attribute `tweettime` must have a rstring or ustring type.*';;
+	tupleInputTypeWrong)
+		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" '*ERROR*Type UINT64:uint64 of attribute tweettime is not supported.*';;
+	*OutputAttrNotExists)
+		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" '*ERROR*No outputAvroMessage attribute `myAvroMessage` found in output stream.*';;
+	*OutputAttrNoBlob)
+		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" '*ERROR*outputAvroMessage attribute `avroMessage` must have a blob type.*';;
 	*)
 		printErrorAndExit "Wrong variant $TTRO_variantCase" $errRt;;
 	esac

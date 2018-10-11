@@ -74,7 +74,6 @@ public class TupleToAvro extends AbstractOperator {
 	private long bytesPerMessage = 0;
 	private long tuplesPerMessage = 0;
 	private long timePerMessage = 0;
-	private boolean ignoreParsingError = false;
 	private Schema messageSchema;
 
 	@Parameter(optional = true, description = "The ouput stream attribute which contains the output Avro message(s). This attribute must be of type blob. Default is the sole output attribute when the schema has one attribute otherwise `avroMessage`.")
@@ -125,13 +124,6 @@ public class TupleToAvro extends AbstractOperator {
 			+ "the maximum time in seconds before the Avro message block is submitted to the output port.")
 	public void setTimePerMessage(Long timePerMessage) {
 		this.timePerMessage = timePerMessage;
-	}
-
-	@Parameter(optional = true, description = "Ignore any tuple or Avro parsing errors. When set to true, errors that "
-			+ "occur when parsing the incoming tuple or constructing the Avro tuple(s) will be ignored and the incoming tuple(s) "
-			+ "will be skipped.")
-	public void setIgnoreParsingError(Boolean ignoreParsingError) {
-		this.ignoreParsingError = ignoreParsingError;
 	}
 
 	// Variables
@@ -185,11 +177,11 @@ public class TupleToAvro extends AbstractOperator {
 		}
 		Attribute outputAvroMessageAttribute = ssOp0.getAttribute(outputAvroMessage);
 		if (outputAvroMessageAttribute == null) {
-			throw new IllegalArgumentException("No outputAvroMessage attribute `" + outputAvroMessage + "` found in output stream");
+			throw new IllegalArgumentException("No outputAvroMessage attribute `" + outputAvroMessage + "` found in output stream.");
 		} else {
-			MetaType paramType = outputAvroMessageAttribute.getType().getMetaType();
-			if(paramType!=MetaType.BLOB) {
-				throw new IllegalArgumentException("outputAvroMessage attribute `" + outputAvroMessage + "` must have a blob type");
+			MetaType attributeType = outputAvroMessageAttribute.getType().getMetaType();
+			if(attributeType!=MetaType.BLOB) {
+				throw new IllegalArgumentException("outputAvroMessage attribute `" + outputAvroMessage + "` must have a blob type.");
 			}
 		}
 		tracer.log(TraceLevel.TRACE, "Output Avro message attribute: " + outputAvroMessage);
@@ -209,7 +201,6 @@ public class TupleToAvro extends AbstractOperator {
 
 		tracer.log(TraceLevel.TRACE, "Embed Avro schema in generated output Avro message block: " + embedAvroSchema);
 		tracer.log(TraceLevel.TRACE, "Submit Avro message block when punctuation is received: " + submitOnPunct);
-		tracer.log(TraceLevel.TRACE, "Ignore parsing error: " + ignoreParsingError);
 
 		// submitOnPunct is only valid if Avro schema is embedded in the output
 		if (submitOnPunct && !embedAvroSchema)
@@ -273,12 +264,8 @@ public class TupleToAvro extends AbstractOperator {
 				submitAvroToOuput();
 			}
 		} catch (Exception e) {
-			tracer.log(TraceLevel.ERROR,
-					"Error while converting tuple to AVRO schema: " + e.getMessage() + ". Tuple: " + inputStream);
-			// If parsing errors must not be ignored, make the operator fail
-			if (!ignoreParsingError)
-				throw new Exception(
-						"Error while converting tuple to AVRO schema: " + e.getMessage() + ". Tuple: " + inputStream);
+			tracer.log(TraceLevel.ERROR, "Error while converting tuple to AVRO schema: " + e.getMessage() + ". Tuple: " + inputStream);
+			e.printStackTrace();
 		}
 	}
 

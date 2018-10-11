@@ -55,9 +55,9 @@ myEval() {
 	inputNoBlob)
 		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" '' '*Conversion between*Blob*not supported*';;
 	outputAttrNotExists)
-		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" '' '*java.lang.IllegalArgumentException: No outputJsonMessage attribute `xx` found in output stream*';;
+		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" '' '*java.lang.IllegalArgumentException: No outputJsonMessage attribute `xx` found in output stream.*';;
 	outputAttrNoString)
-		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" '' '*java.lang.IllegalArgumentException: outputJsonMessage attribute `x` must have a rstring or ustring type*';;
+		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" '' '*java.lang.IllegalArgumentException: outputJsonMessage attribute `x` must have a rstring or ustring type.*';;
 	*)
 		printErrorAndExit "Wrong variant $TTRO_variantCase" $errRt;;
 	esac

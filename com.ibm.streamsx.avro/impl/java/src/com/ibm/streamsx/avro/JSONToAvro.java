@@ -194,6 +194,15 @@ public class JSONToAvro extends AbstractOperator {
 			}
 		}
 		tracer.log(TraceLevel.TRACE, "Input JSON message attribute: " + inputJsonMessage);
+		Attribute inputJsonMessageAttribute = ssIp0.getAttribute(inputJsonMessage);
+		if (inputJsonMessageAttribute == null) {
+			throw new IllegalArgumentException("No inputJsonMessage attribute `" + inputJsonMessage + "` found in input stream.");
+		} else {
+			MetaType attributeType = inputJsonMessageAttribute.getType().getMetaType();
+			if (attributeType!=MetaType.RSTRING && attributeType!=MetaType.USTRING) {
+				throw new IllegalArgumentException("inputJsonMessage attribute `" + inputJsonMessage + "` must have a rstring or ustring type.");
+			}
+		}
 
 		// If no output Avro message attribute specified, use default
 		if (outputAvroMessage == null) {
@@ -206,11 +215,11 @@ public class JSONToAvro extends AbstractOperator {
 		tracer.log(TraceLevel.TRACE, "Output Avro message attribute: " + outputAvroMessage);
 		Attribute outputAvroMessageAttribute = ssOp0.getAttribute(outputAvroMessage);
 		if (outputAvroMessageAttribute == null) {
-			throw new IllegalArgumentException("No outputAvroMessage attribute `" + outputAvroMessage + "` found in output stream");
+			throw new IllegalArgumentException("No outputAvroMessage attribute `" + outputAvroMessage + "` found in output stream.");
 		} else {
-			MetaType paramType = outputAvroMessageAttribute.getType().getMetaType();
-			if(paramType!=MetaType.BLOB) {
-				throw new IllegalArgumentException("outputAvroMessage attribute `" + outputAvroMessage + "` must have a blob type");
+			MetaType attributeType = outputAvroMessageAttribute.getType().getMetaType();
+			if(attributeType!=MetaType.BLOB) {
+				throw new IllegalArgumentException("outputAvroMessage attribute `" + outputAvroMessage + "` must have a blob type.");
 			}
 		}
 

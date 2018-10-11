@@ -174,11 +174,11 @@ public class AvroToJSON extends AbstractOperator {
 		tracer.log(TraceLevel.TRACE, "Output JSON message attribute: " + outputJsonMessage);
 		Attribute outputJsonMessageAttribute = ssOp0.getAttribute(outputJsonMessage);
 		if (outputJsonMessageAttribute == null) {
-			throw new IllegalArgumentException("No outputJsonMessage attribute `" + outputJsonMessage + "` found in output stream");
+			throw new IllegalArgumentException("No outputJsonMessage attribute `" + outputJsonMessage + "` found in output stream.");
 		} else {
-			MetaType paramType = outputJsonMessageAttribute.getType().getMetaType();
-			if(paramType!=MetaType.USTRING && paramType!=MetaType.RSTRING) {
-				throw new IllegalArgumentException("outputJsonMessage attribute `" + outputJsonMessage + "` must have a rstring or ustring type");
+			MetaType attributeType = outputJsonMessageAttribute.getType().getMetaType();
+			if(attributeType!=MetaType.USTRING && attributeType!=MetaType.RSTRING) {
+				throw new IllegalArgumentException("outputJsonMessage attribute `" + outputJsonMessage + "` must have a rstring or ustring type.");
 			}
 		}
 
@@ -195,8 +195,8 @@ public class AvroToJSON extends AbstractOperator {
 			if (attribute == null) {
 				throw new IllegalArgumentException("No outputJsonKey attribute `" + outputJsonKey + "` found in output stream");
 			} else {
-				MetaType paramType = attribute.getType().getMetaType();
-				if(paramType!=MetaType.USTRING && paramType!=MetaType.RSTRING) {
+				MetaType attributeType = attribute.getType().getMetaType();
+				if(attributeType!=MetaType.USTRING && attributeType!=MetaType.RSTRING) {
 					throw new IllegalArgumentException("outputJsonKey attribute " + outputJsonKey + " must have a rstring or ustring type");
 				}
 			}

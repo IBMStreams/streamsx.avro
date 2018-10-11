@@ -23,6 +23,7 @@ import org.apache.avro.io.EncoderFactory;
 import org.apache.log4j.Logger;
 
 import com.ibm.streams.operator.AbstractOperator;
+import com.ibm.streams.operator.Attribute;
 import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.OutputTuple;
 import com.ibm.streams.operator.StreamSchema;
@@ -31,6 +32,7 @@ import com.ibm.streams.operator.StreamingOutput;
 import com.ibm.streams.operator.Tuple;
 import com.ibm.streams.operator.OperatorContext.ContextCheck;
 import com.ibm.streams.operator.StreamingData.Punctuation;
+import com.ibm.streams.operator.Type.MetaType;
 import com.ibm.streams.operator.compile.OperatorContextChecker;
 import com.ibm.streams.operator.log4j.TraceLevel;
 import com.ibm.streams.operator.model.InputPortSet;
@@ -202,6 +204,15 @@ public class JSONToAvro extends AbstractOperator {
 			}
 		}
 		tracer.log(TraceLevel.TRACE, "Output Avro message attribute: " + outputAvroMessage);
+		Attribute outputAvroMessageAttribute = ssOp0.getAttribute(outputAvroMessage);
+		if (outputAvroMessageAttribute == null) {
+			throw new IllegalArgumentException("No outputAvroMessage attribute `" + outputAvroMessage + "` found in output stream");
+		} else {
+			MetaType paramType = outputAvroMessageAttribute.getType().getMetaType();
+			if(paramType!=MetaType.BLOB) {
+				throw new IllegalArgumentException("outputAvroMessage attribute `" + outputAvroMessage + "` must have a blob type");
+			}
+		}
 
 		// Get the Avro schema file to parse the Avro messages
 		tracer.log(TraceLevel.TRACE, "Retrieving and parsing Avro message schema file " + avroMessageSchemaFile);
@@ -337,6 +348,7 @@ public class JSONToAvro extends AbstractOperator {
 	}
 
 	static final String DESC = "This operator converts JSON strings into binary Avro messages."
+			+ " If an input or output message attribute is not found or has an incompatible type, the operator will fail."
 			+ " If an invalid JSON string is found in the input, the operator will fail."
 			+ " This operator must not be used inside a consistent region.";
 

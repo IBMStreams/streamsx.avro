@@ -336,7 +336,7 @@ public class AvroToJSON extends AbstractOperator {
 	}
 
 	static final String DESC = "This operator converts binary Avro messages and optionally message keys into a JSON string."
-			+ " If an invalid Avro message or key is found in the input, the operator will not produce an output tuple."
+			+ " If an input or output message or key attribute is not found or has an incompatible type, the operator will fail."
 			+ " This operator must not be used inside a consistent region.";
 
 }

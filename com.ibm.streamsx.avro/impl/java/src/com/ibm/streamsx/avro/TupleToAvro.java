@@ -20,6 +20,7 @@ import org.apache.avro.io.EncoderFactory;
 import org.apache.log4j.Logger;
 
 import com.ibm.streams.operator.AbstractOperator;
+import com.ibm.streams.operator.Attribute;
 import com.ibm.streams.operator.OperatorContext;
 import com.ibm.streams.operator.OutputTuple;
 import com.ibm.streams.operator.StreamSchema;
@@ -28,6 +29,7 @@ import com.ibm.streams.operator.StreamingOutput;
 import com.ibm.streams.operator.Tuple;
 import com.ibm.streams.operator.OperatorContext.ContextCheck;
 import com.ibm.streams.operator.StreamingData.Punctuation;
+import com.ibm.streams.operator.Type.MetaType;
 import com.ibm.streams.operator.compile.OperatorContextChecker;
 import com.ibm.streams.operator.log4j.TraceLevel;
 import com.ibm.streams.operator.model.InputPortSet;
@@ -181,6 +183,15 @@ public class TupleToAvro extends AbstractOperator {
 				outputAvroMessage = DEFAULT_OUTPUT_AVRO_MSG_ATTRIBUTE;
 			}
 		}
+		Attribute outputAvroMessageAttribute = ssOp0.getAttribute(outputAvroMessage);
+		if (outputAvroMessageAttribute == null) {
+			throw new IllegalArgumentException("No outputAvroMessage attribute `" + outputAvroMessage + "` found in output stream");
+		} else {
+			MetaType paramType = outputAvroMessageAttribute.getType().getMetaType();
+			if(paramType!=MetaType.BLOB) {
+				throw new IllegalArgumentException("outputAvroMessage attribute `" + outputAvroMessage + "` must have a blob type");
+			}
+		}
 		tracer.log(TraceLevel.TRACE, "Output Avro message attribute: " + outputAvroMessage);
 
 		// Get the Avro schema file to parse the Avro messages
@@ -322,7 +333,8 @@ public class TupleToAvro extends AbstractOperator {
 	static final String DESC = "This operator converts Streams tuples into binary Avro messages. The input tuples can be"
 			+ "nested types with lists and tuples, but the attribute types must be mappable to the Avro primitive types. "
 			+ "boolean, float32, float64, int32, int64, rstring and ustring are respectively mapped to "
-			+ "Boolean, Float, Double, Integer, Long, String "
+			+ "Boolean, Float, Double, Integer, Long, String. "
+			+ "If the output message attribute is not found or has no blob type, the operator will fail."
 			+ "This operator must not be used inside a consistent region.";
 
 }

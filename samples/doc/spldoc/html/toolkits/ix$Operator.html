@@ -30,21 +30,27 @@
   
 <dl class="dl">
 
-  <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.avro/op$com.ibm.streamsx.avro$AvroToJSON.html">AvroToJSON</a></dt>
+  <dt class="dt dlterm"><a class="xref" href="../tk$AvroJSONSample/spl$com.ibm.streamsx.avro.sample$AvroJSONSample.html#spldoc_compilationunit__composite_operator__AvroJSONSample">AvroJSONSample</a></dt>
 
-  <dd class="dd">This operator converts binary Avro messages and optionally message keys into a JSON string.</dd>
-
-
-
-  <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.avro/op$com.ibm.streamsx.avro$JSONToAvro.html">JSONToAvro</a></dt>
-
-  <dd class="dd">This operator converts JSON strings into binary Avro messages.</dd>
+  <dd class="dd">Convert tuple to JSON, then to Avro and back to JSON.</dd>
 
 
 
-  <dt class="dt dlterm"><a class="xref" href="../tk$com.ibm.streamsx.avro/op$com.ibm.streamsx.avro$TupleToAvro.html">TupleToAvro</a></dt>
+  <dt class="dt dlterm"><a class="xref" href="../tk$ReadAvroFileSample/spl$com.ibm.streamsx.avro.sample$ReadAvroFileSample.html#spldoc_compilationunit__composite_operator__ReadAvroFileSample">ReadAvroFileSample</a></dt>
 
-  <dd class="dd">This operator converts Streams tuples into binary Avro messages.</dd>
+  <dd class="dd">Read a file in avro format, convert the content to JSON and dump it to the console output.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="../tk$TupleToAvroSample/spl$com.ibm.streamsx.avro.sample$TupleToAvroSample.html#spldoc_compilationunit__composite_operator__TupleToAvroSample">TupleToAvroSample</a></dt>
+
+  <dd class="dd">Convert tuple to Avro.</dd>
+
+
+
+  <dt class="dt dlterm"><a class="xref" href="../tk$WriteAvroFileSample/spl$com.ibm.streamsx.avro.sample$WriteAvroFileSample.html#spldoc_compilationunit__composite_operator__WriteAvroFileSample">WriteAvroFileSample</a></dt>
+
+  <dd class="dd">Converts a tuple to JSON, creates a blob in avro format with JSONToAvro operator and writes it to file.</dd>
 
 
 </dl>

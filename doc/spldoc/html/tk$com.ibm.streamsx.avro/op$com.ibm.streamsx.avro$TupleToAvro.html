@@ -22,7 +22,7 @@
 <div class="body refbody">
 <div class="section">
 <p class="p">
-<a class="xref" href="../toolkits/toolkits.html">Toolkits</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.avro.html">com.ibm.streamsx.avro 1.1.1</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.avro.html">com.ibm.streamsx.avro</a> &gt; TupleToAvro</p>
+<a class="xref" href="../toolkits/toolkits.html">IBMStreams streamsx.avro Toolkit</a> &gt; <a class="xref" href="tk$com.ibm.streamsx.avro.html">com.ibm.streamsx.avro 1.2.0</a> &gt; <a class="xref" href="ns$com.ibm.streamsx.avro.html">com.ibm.streamsx.avro</a> &gt; TupleToAvro</p>
 
 </div>
 
@@ -32,7 +32,16 @@
 
 <div class="section">
 
-<p class="p">This operator converts Streams tuples into binary Avro messages. The input tuples can benested types with lists and tuples, but the attribute types must be mappable to the Avro primitive types. boolean, float32, float64, int32, int64, rstring and ustring are respectively mapped to Boolean, Float, Double, Integer, Long, String
+<p class="p">This operator converts Streams tuples into binary Avro messages. The input tuples can benested types with lists and tuples, but the attribute types must be mappable to the Avro primitive types. boolean, float32, float64, int32, int64, rstring and ustring are respectively mapped to Boolean, Float, Double, Integer, Long, String.
+</p>
+
+<p class="p">If parameter <tt class="ph tt">embedAvroSchema</tt> is false, the operator passes window punctuation marker transparently to the output port. If parameter <tt class="ph tt">embedAvroSchema</tt> is true, the operator generates window punctuation markers.
+</p>
+
+<p class="p">If the output message attribute is not found or has no blob type, the operator will fail.
+</p>
+
+<p class="p">This operator must not be used inside a consistent region.
 </p>
 
 </div>
@@ -55,14 +64,14 @@
  
   <dt class="dt dlterm">Parameters</dt>
 
-  <dd class="dd">This operator supports 8 parameters.
+  <dd class="dd">This operator supports 7 parameters.
 <p class="p"> Required: 
 <a class="xref" href="#spldoc_operator__parameter__avroMessageSchemaFile">avroMessageSchemaFile</a>
 
 </p>
 
 <p class="p"> Optional: 
-<a class="xref" href="#spldoc_operator__parameter__bytesPerMessage">bytesPerMessage</a>, <a class="xref" href="#spldoc_operator__parameter__embedAvroSchema">embedAvroSchema</a>, <a class="xref" href="#spldoc_operator__parameter__ignoreParsingError">ignoreParsingError</a>, <a class="xref" href="#spldoc_operator__parameter__outputAvroMessage">outputAvroMessage</a>, <a class="xref" href="#spldoc_operator__parameter__submitOnPunct">submitOnPunct</a>, <a class="xref" href="#spldoc_operator__parameter__timePerMessage">timePerMessage</a>, <a class="xref" href="#spldoc_operator__parameter__tuplesPerMessage">tuplesPerMessage</a>
+<a class="xref" href="#spldoc_operator__parameter__bytesPerMessage">bytesPerMessage</a>, <a class="xref" href="#spldoc_operator__parameter__embedAvroSchema">embedAvroSchema</a>, <a class="xref" href="#spldoc_operator__parameter__outputAvroMessage">outputAvroMessage</a>, <a class="xref" href="#spldoc_operator__parameter__submitOnPunct">submitOnPunct</a>, <a class="xref" href="#spldoc_operator__parameter__timePerMessage">timePerMessage</a>, <a class="xref" href="#spldoc_operator__parameter__tuplesPerMessage">tuplesPerMessage</a>
 
 </p>
 </dd>
@@ -98,7 +107,7 @@
 
    <dd class="dd">
 
-<p class="p">Port that ingests tuples
+<p class="p">Port that ingests tuples.
 </p>
    </dd>
 
@@ -150,7 +159,7 @@
 
    <dd class="dd">
 
-<p class="p">Port that produces Avro records
+<p class="p">Port that produces Avro records.
 </p>
 
 <p class="p"/>
@@ -188,14 +197,14 @@
 
 <div class="section">
 <p class="p splhead-1"><strong class="ph b"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters">Parameters</a></strong></p>
-This operator supports 8 parameters.
+This operator supports 7 parameters.
 <p class="p"> Required: 
 <a class="xref" href="#spldoc_operator__parameter__avroMessageSchemaFile">avroMessageSchemaFile</a>
 
 </p>
 
 <p class="p"> Optional: 
-<a class="xref" href="#spldoc_operator__parameter__bytesPerMessage">bytesPerMessage</a>, <a class="xref" href="#spldoc_operator__parameter__embedAvroSchema">embedAvroSchema</a>, <a class="xref" href="#spldoc_operator__parameter__ignoreParsingError">ignoreParsingError</a>, <a class="xref" href="#spldoc_operator__parameter__outputAvroMessage">outputAvroMessage</a>, <a class="xref" href="#spldoc_operator__parameter__submitOnPunct">submitOnPunct</a>, <a class="xref" href="#spldoc_operator__parameter__timePerMessage">timePerMessage</a>, <a class="xref" href="#spldoc_operator__parameter__tuplesPerMessage">tuplesPerMessage</a>
+<a class="xref" href="#spldoc_operator__parameter__bytesPerMessage">bytesPerMessage</a>, <a class="xref" href="#spldoc_operator__parameter__embedAvroSchema">embedAvroSchema</a>, <a class="xref" href="#spldoc_operator__parameter__outputAvroMessage">outputAvroMessage</a>, <a class="xref" href="#spldoc_operator__parameter__submitOnPunct">submitOnPunct</a>, <a class="xref" href="#spldoc_operator__parameter__timePerMessage">timePerMessage</a>, <a class="xref" href="#spldoc_operator__parameter__tuplesPerMessage">tuplesPerMessage</a>
 
 </p>
 <dl class="dl">
@@ -234,7 +243,7 @@ This operator supports 8 parameters.
 <dt class="dt dlterm"><a name="spldoc_operator__parameter__bytesPerMessage"><!-- --></a><tt class="ph tt">bytesPerMessage</tt></dt>
 
 <dd class="dd">
-<p class="p">Only valid if Avro schema is embedded in the output. This parameter controls the minimum size in bytes that the Avro message block should be before it is submitted to the outputport.
+<p class="p">This parameter controls the minimum size in bytes that the Avro message block should be before it is submitted to the output port. Default is 0l. Only valid if Avro schema is embedded in the output.
 </p>
 <dl class="dl">
 
@@ -266,37 +275,6 @@ This operator supports 8 parameters.
 
 <dd class="dd">
 <p class="p">Embed the schema in the generated Avro message. When generating Avro messages that must be persisted to a file system, the schema is expected to be included in the file. If this parameter is set to true, incoming tuples are batched and a large binary object that contains the Avro schema and 1 or more messages is generated. Also, you must specify one of the parameters (submitOnPunct, bytesPerMessage, tuplesPerMessage, timePerMessage) that controls when Avro message block is submitted to the output port.After submitting the Avro message to the output port, a punctuation is generated so that the receiving operator can potentially create a new file.
-</p>
-<dl class="dl">
-
- <dt class="dt dlterm">Properties </dt>
-
- <dd class="dd">
-  <ul class="sl simple">
-  <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__type">Type</a>: boolean
-  </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__cardinality">Cardinality</a>: 1
-     </li>
-
-     <li class="sli"><a class="xref" href="../references/OperatorModel.html#spldoc_reference_operator_model__parameters__parameter__optional">Optional</a>: true
-     </li>
-
-  </ul>
-
- </dd>
-
-
-</dl>
-
-</dd>
-
-
-
-<dt class="dt dlterm"><a name="spldoc_operator__parameter__ignoreParsingError"><!-- --></a><tt class="ph tt">ignoreParsingError</tt></dt>
-
-<dd class="dd">
-<p class="p">Ignore any tuple or Avro parsing errors. When set to true, errors that occur when parsing the incoming tuple or constructing the Avro tuple(s) will be ignored and the incoming tuple(s) will be skipped.
 </p>
 <dl class="dl">
 
@@ -358,7 +336,7 @@ This operator supports 8 parameters.
 <dt class="dt dlterm"><a name="spldoc_operator__parameter__submitOnPunct"><!-- --></a><tt class="ph tt">submitOnPunct</tt></dt>
 
 <dd class="dd">
-<p class="p">Only valid if Avro schema is embedded in the output. When set to true, this the operator will submit the block of Avro messages what was built and generate a punctuation so that the receiving operator can potentially create a new file.
+<p class="p">When set to true, the operator will submit the block of Avro messages what was built and generate a punctuation so that the receiving operator can potentially create a new file. Default is false. Only valid if Avro schema is embedded in the output.
 </p>
 <dl class="dl">
 
@@ -389,7 +367,7 @@ This operator supports 8 parameters.
 <dt class="dt dlterm"><a name="spldoc_operator__parameter__timePerMessage"><!-- --></a><tt class="ph tt">timePerMessage</tt></dt>
 
 <dd class="dd">
-<p class="p">Only valid if Avro schema is embedded in the output. This parameter controls the maximum time in seconds before the Avro message block is submitted to the output port.
+<p class="p">This parameter controls the maximum time in seconds before the Avro message block is submitted to the output port. Default is 0l. Only valid if Avro schema is embedded in the output.
 </p>
 <dl class="dl">
 
@@ -420,7 +398,7 @@ This operator supports 8 parameters.
 <dt class="dt dlterm"><a name="spldoc_operator__parameter__tuplesPerMessage"><!-- --></a><tt class="ph tt">tuplesPerMessage</tt></dt>
 
 <dd class="dd">
-<p class="p">Only valid if Avro schema is embedded in the output. This parameter controls the minimum number of tuples that the Avro message block should contain before it is submitted to the outputport.
+<p class="p">This parameter controls the minimum number of tuples that the Avro message block should contain before it is submitted to the output port. Default is 0l. Only valid if Avro schema is embedded in the output.
 </p>
 <dl class="dl">
 

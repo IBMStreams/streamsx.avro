@@ -15,13 +15,13 @@ Add this directory to the toolkit path of your Streams installation by either:
 ## Develop the toolkit
 See [Develop](DEVELOPMENT.md)
 
-##What's new
+## What's new
 
-###Version 1.1.0:
+### Version 1.1.0:
 * toolkit version is 1.1.0
 * initial release for toolkit, samples and test contributed by [fketelaars](https://github.com/fketelaars)
 
-###Version 1.2.0:
+### Version 1.2.0:
 * toolkit build script and global build script with common targets available
 * new structure of samples directory - each sample is now a separate project
 * samples can now be build from command line (`make`) or from Streams Studio

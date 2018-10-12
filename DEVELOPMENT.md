@@ -28,5 +28,5 @@ To clean all test artifacts, execute:
 
 `ant test-clean`
 
-For more information read the file [TEST](tests/README.md) .
+For more information read the file [TEST](tests/frameworktests/README.md) .
 

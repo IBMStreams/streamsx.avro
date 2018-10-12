@@ -29,8 +29,6 @@ public composite AvroJSONSample {
 			param
 				avroMessageSchemaFile: getThisToolkitDir()+"/etc/twitter.avsc";
 				//<embedAvroSchema_false>embedAvroSchema: false;
-				//<embedAvroSchema_false2 embedAvroSchema_true>embedAvroSchema: true;
-				//<embedAvroSchema_false2 embedAvroSchema_true>submitOnPunct: true;
 		}
 
 		/* Convert the Avro message to a JSON string */
@@ -38,13 +36,11 @@ public composite AvroJSONSample {
 				//<!inputNoAvroMessage inputNoBlob>ConvertToAvro
 				//<inputNoAvroMessage inputNoBlob>GenerateTweet
 			) {
-			//<!embedAvroSchema_false2>param
-				//<!embedAvroSchema_false*>avroMessageSchemaFile: getThisToolkitDir()+"/etc/twitter.avsc";
-				//<embedAvroSchema_false>avroSchemaEmbedded: false;
-				//<embedAvroSchema_true>avroSchemaEmbedded: true;
-				//<inputNoBlob>inputAvroMessage: "tweet";
-				//<outputAttrNotExists>outputJsonMessage: "xx";
-				//<outputAttrNoString>outputJsonMessage: "x";
+				//<!embedAvroSchema_false>param
+					//<!embedAvroSchema_false>avroMessageSchemaFile: getThisToolkitDir()+"/etc/twitter.avsc";
+					//<inputNoBlob>inputAvroMessage: "tweet";
+					//<outputAttrNotExists>outputJsonMessage: "xx";
+					//<outputAttrNoString>outputJsonMessage: "x";
 		}
 
 	config

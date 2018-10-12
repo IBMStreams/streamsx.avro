@@ -42,9 +42,8 @@ public composite Main {
 		
 		/* Convert the Avro message to a JSON string */
 		stream<rstring jsonMessage> ConvertToJson = AvroToJSON(ConvertToAvro) {
-			param
+			//<embedAvroSchema_false>param
 				//<embedAvroSchema_false> avroMessageSchemaFile: getApplicationDir()+"/etc/twitter.avsc";
-				//<!embedAvroSchema_false>avroSchemaEmbedded: true;
 		}
 
 		// Write the Avro message to output file

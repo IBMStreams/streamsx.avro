@@ -41,9 +41,8 @@ public composite Main {
 		}
 
 		stream<rstring jsonMessage> ConvertToJson = AvroToJSON(ConvertToAvro) {
-			param
+			//<embedAvroSchema_false>param
 				//<embedAvroSchema_false> avroMessageSchemaFile: getApplicationDir()+"/etc/twitter_complex.avsc";
-				//<!embedAvroSchema_false>avroSchemaEmbedded: true;
 		}
 		
 		// output to Tuple 

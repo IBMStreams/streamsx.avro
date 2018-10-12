@@ -21,8 +21,6 @@ public composite ReadAvroFileSample
 		// Convert the blob to JSON
 		stream<rstring jsonMessage> ConvertAvroToJson = AvroToJSON(ReadFile)
 		{
-			param
-				avroSchemaEmbedded: true;
 		}
 
 		// Display the retrieved JSON message

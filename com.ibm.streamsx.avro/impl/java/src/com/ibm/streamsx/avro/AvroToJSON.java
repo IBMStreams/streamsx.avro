@@ -75,7 +75,7 @@ public class AvroToJSON extends AbstractOperator {
 
 	protected String avroMessageSchemaFile = "";
 	protected String avroKeySchemaFile = "";
-	protected boolean avroSchemaEmbedded = false;
+	protected boolean avroSchemaEmbedded = true;
 	Schema messageSchema;
 	Schema keySchema;
 
@@ -99,19 +99,18 @@ public class AvroToJSON extends AbstractOperator {
 		this.outputJsonKey = outputJsonKey;
 	}
 
-	@Parameter(optional = true, description = "File that contains the Avro schema to deserialize the binary Avro message.")
+	@Parameter(optional = true, description = "File that contains the Avro schema to deserialize the binary Avro message. If this parameter is non empty, the operator works in mode `No Avro Schema Embedded`.")
 	public void setAvroMessageSchemaFile(String avroMessageSchemaFile) {
 		this.avroMessageSchemaFile = avroMessageSchemaFile;
+		if (!avroMessageSchemaFile.isEmpty())
+			avroSchemaEmbedded = false;
 	}
 
-	@Parameter(optional = true, description = "File that contains the Avro schema to deserialize the binary Avro key.")
-	public void setAvroMessageKeyFile(String avroKeySchemaFile) {
+	@Parameter(optional = true, description = "File that contains the Avro schema to deserialize the binary Avro key. If this parameter is non empty, the operator works in mode `No Avro Schema Embedded`.")
+	public void setAvroKeySchemaFile(String avroKeySchemaFile) {
 		this.avroKeySchemaFile = avroKeySchemaFile;
-	}
-
-	@Parameter(optional = true, description = "Is the Avro schema embedded in the input Avro blob(s)? Default is `false`")
-	public void setAvroSchemaEmbedded(boolean avroSchemaEmbedded) {
-		this.avroSchemaEmbedded = avroSchemaEmbedded;
+		if (!avroKeySchemaFile.isEmpty())
+			avroSchemaEmbedded = false;
 	}
 
 	/**
@@ -217,8 +216,9 @@ public class AvroToJSON extends AbstractOperator {
 		}
 
 		// If the schema is embedded in the message, the schema file must not be specified
-		if (avroSchemaEmbedded && !avroMessageSchemaFile.isEmpty())
-			throw new IllegalArgumentException("Parameter avroMessageSchema cannot be specified if the schema is embedded in the message.");
+		if (!avroSchemaEmbedded && avroKeySchemaFile.isEmpty() && (inputAvroKey != null))
+			throw new IllegalArgumentException("Operator mode is No Avro Schema Embedded, inputAvroKey is present but no parameter avroKeySchemaFile is present.");
+		
 		tracer.log(TraceLevel.TRACE, "AvroToJSON operator initialized, ready to receive tuples");
 
 	}
@@ -335,8 +335,17 @@ public class AvroToJSON extends AbstractOperator {
 		dataFileReader.close();
 	}
 
-	static final String DESC = "This operator converts binary Avro messages and optionally message keys into a JSON string."
-			+ " If an input or output message or key attribute is not found or has an incompatible type, the operator will fail."
-			+ " This operator must not be used inside a consistent region.";
+	static final String DESC = "This operator converts binary Avro messages and optionally message keys into a JSON string. "
+			+ "The operator has two operation modes::\\n"
+			+ "* Avro Schema Embedded: The operator processes a blob which contains one or more Avro messages and has the schema embedded. "
+			+ "This is the pattern when Avro objects are read from a file (either local file system or HDFS). Every Avro "
+			+ "object in the blob is converted to JSON and then submitted to the output port. This operation mode is entered "
+			+ "if both parameters `avroMessageSchemaFile` and `avroKeySchemaFile` are not existing or have an empty value.\\n"
+			+ "* No Avro Schema Embedded: The operator processes an Avro Blob containing a single message and with no embedded "
+			+ "schema. This is the pattern when Avro objects are passed over messaging infrastructure such as Apache Kafka. "
+			+ "This operation mode is entered if one or both parameters `avroMessageSchemaFile` and `avroKeySchemaFile` "
+			+ "are specified.\\n"
+			+ "If an input or output message or key attribute is not found or has an incompatible type, the operator will fail.\\n"
+			+ "This operator must not be used inside a consistent region.";
 
 }

@@ -22,7 +22,6 @@ public composite Main {
 		//<JSONToAvro>stream<rstring jsonMessage> Input2 = TupleToJSON(Input) {}
 		
 		//<AvroToJSON>stream<rstring jsonMessage> Output = AvroToJSON(Input) {
-		//<AvroToJSON>	param avroSchemaEmbedded: true;
 		//<JSONToAvro>stream<blob avroMessage> Output = JSONToAvro(Input2) {
 		//<TupleToAvro>stream<blob avroMessage> Output = TupleToAvro(Input) {
 		//<!AvroToJSON>	param

@@ -12,9 +12,7 @@ public composite Main {
 		}
 
 		// Convert the blob to JSON
-		stream<rstring jsonMessage> Output = AvroToJSON(Input) {
-			param avroSchemaEmbedded: true;
-		}
+		stream<rstring jsonMessage> Output = AvroToJSON(Input) { }
 
 		() as Sink = FileSink1(Output) { }
 	

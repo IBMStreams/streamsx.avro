@@ -1,4 +1,4 @@
-#--variantList='embedAvroSchema_false embedAvroSchema_false2 embedAvroSchema_true inputNoAvroMessage inputNoBlob outputAttrNotExists outputAttrNoString'
+#--variantList='embedAvroSchema_false inputNoAvroMessage inputNoBlob outputAttrNotExists outputAttrNoString'
 
 PREPS=(
 	'myExplain'
@@ -15,11 +15,7 @@ STEPS=(
 myExplain() {
 	case "$TTRO_variantCase" in
 	embedAvroSchema_false)
-		echo "No schema embedded in Avro stream and no schema expected in stream -> exeption but no error";;
-	embedAvroSchema_false2)
-		echo "Schema embedded in Avro stream but no schema expected in stream -> exeption  but no error";;
-	embedAvroSchema_true)
-		echo "Schema embedded in Avro stream, schema expected and schema file specified -> IllegalArgumentException";;
+		echo "No schema embedded in Avro stream but schema is expected in AvroToJSON -> exeption but no error";;
 	inputNoAvroMessage)
 		echo "Input is a tuple with no avroMessage attribute";;
 	inputNoBlob)
@@ -32,7 +28,7 @@ myExplain() {
 }
 
 myEval() {
-	if [[ $TTRO_variantCase == embedAvroSchema_false* ]]; then
+	if [[ $TTRO_variantCase == embedAvroSchema_false ]]; then
 		if [[ $TTTT_result -ne 0 ]]; then
 			setFailure "Unexpected result $TTTT_result"
 			return 0
@@ -46,10 +42,8 @@ myEval() {
 	printInfo "Correct result $TTTT_result returned from standalone"
 	
 	case "$TTRO_variantCase" in
-	embedAvroSchema_false*)
-		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" '' '*NullPointerException*';;
-	embedAvroSchema_true)
-		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" '' '*java.lang.IllegalArgumentException: Parameter avroMessageSchema cannot be specified if the schema is embedded in the message.*';;
+	embedAvroSchema_false)
+		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" '' '*java.io.IOException: Not a data file*';;
 	inputNoAvroMessage)
 		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" '' '*avroMessage*not exist*';;
 	inputNoBlob)

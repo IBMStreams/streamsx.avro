@@ -56,9 +56,9 @@ import com.ibm.streams.operator.types.ValueFactory;
 
 @PrimitiveOperator(name = JSONToAvro.OPER_NAME, namespace = "com.ibm.streamsx.avro", description = JSONToAvro.DESC)
 @InputPorts({
-		@InputPortSet(description = "Port that ingests JSON records", cardinality = 1, optional = false, windowingMode = WindowMode.NonWindowed, windowPunctuationInputMode = WindowPunctuationInputMode.Oblivious) })
+		@InputPortSet(description = "Port that ingests JSON records.", cardinality = 1, optional = false, windowingMode = WindowMode.NonWindowed, windowPunctuationInputMode = WindowPunctuationInputMode.Oblivious) })
 @OutputPorts({
-		@OutputPortSet(description = "Port that produces Avro records", cardinality = 1, optional = false, windowPunctuationOutputMode = WindowPunctuationOutputMode.Generating) })
+		@OutputPortSet(description = "Port that produces Avro records.", cardinality = 1, optional = false, windowPunctuationOutputMode = WindowPunctuationOutputMode.Generating) })
 @Icons(location16 = "icons/JsonToAvro_16.gif", location32 = "icons/JsonToAvro_32.gif")
 @Libraries(value = { "opt/downloaded/*" })
 public class JSONToAvro extends AbstractOperator {
@@ -109,36 +109,36 @@ public class JSONToAvro extends AbstractOperator {
 		this.embedAvroSchema = embedAvroSchema;
 	}
 
-	@Parameter(optional = true, description = "Only valid if Avro schema is embedded in the output. When set to true, this "
-			+ "the operator will submit the block of Avro messages what was built and generate a punctuation so that the "
-			+ "receiving operator can potentially create a new file.")
+	@Parameter(optional = true, description = "When set to true, the operator will submit the block of Avro messages what "
+			+ "was built and generate a punctuation so that the receiving operator can potentially create a new file. Default is false. "
+			+ "Only valid if Avro schema is embedded in the output.")
 	public void setSubmitOnPunct(Boolean submitOnPunct) {
 		this.submitOnPunct = submitOnPunct;
 	}
 
-	@Parameter(optional = true, description = "Only valid if Avro schema is embedded in the output. This parameter controls "
-			+ "the minimum size in bytes that the Avro message block should be before it is submitted to the output"
-			+ "port.")
+	@Parameter(optional = true, description = "This parameter controls the minimum size in bytes that the Avro message "
+			+ "block should be before it is submitted to the output port. Default value is 0l (disabled). Only valid if Avro "
+			+ "schema is embedded in the output.")
 	public void setBytesPerMessage(Long bytesPerMessage) {
 		this.bytesPerMessage = bytesPerMessage;
 	}
 
-	@Parameter(optional = true, description = "Only valid if Avro schema is embedded in the output. This parameter controls "
-			+ "the minimum number of tuples that the Avro message block should contain before it is submitted to the output"
-			+ "port.")
+	@Parameter(optional = true, description = "This parameter controls the minimum number of tuples that the Avro message block "
+			+ "should contain before it is submitted to the output port. Default is 0l (disabled). Only valid if Avro schema "
+			+ "is embedded in the output.")
 	public void setTuplesPerMessage(Long tuplesPerMessage) {
 		this.tuplesPerMessage = tuplesPerMessage;
 	}
 
-	@Parameter(optional = true, description = "Only valid if Avro schema is embedded in the output. This parameter controls "
-			+ "the maximum time in seconds before the Avro message block is submitted to the output port.")
+	@Parameter(optional = true, description = "This parameter controls the maximum time in seconds before the Avro message block "
+			+ "is submitted to the output port. Default value is 0l (disabled). Only valid if Avro schema is embedded in the output.")
 	public void setTimePerMessage(Long timePerMessage) {
 		this.timePerMessage = timePerMessage;
 	}
 
 	@Parameter(optional = true, description = "Ignore any JSON or Avro parsing errors. When set to true, errors that "
 			+ "occur when parsing the incoming JSON tuple or constructing the Avro tuple(s) will be ignored and the incoming tuple(s) "
-			+ "will be skipped.")
+			+ "will be skipped. Default is false.")
 	public void setIgnoreParsingError(Boolean ignoreParsingError) {
 		this.ignoreParsingError = ignoreParsingError;
 	}
@@ -233,10 +233,10 @@ public class JSONToAvro extends AbstractOperator {
 		tracer.log(TraceLevel.TRACE, "Submit Avro message block when punctuation is received: " + submitOnPunct);
 		tracer.log(TraceLevel.TRACE, "Ignore parsing error: " + ignoreParsingError);
 
-		// submitOnPunct is only valid if Avro schema is embedded in the output
-		if (submitOnPunct && !embedAvroSchema)
+		// submitOnPunct.. is only valid if Avro schema is embedded in the output
+		if (!embedAvroSchema && ( submitOnPunct || (tuplesPerMessage != 0) || (bytesPerMessage != 0) || (timePerMessage != 0) ) )
 			throw new Exception(
-					"Parameter submitOnPunct can only be set to true if Avro schema is embedded in the output.");
+					"Parameters submitOnPunct, tuplesPerMessage, bytesPerMessage or timePerMessage can only be set if Avro schema is embedded in the output.");
 		// If Avro schema is embedded in the output, submitOnPunct is mandatory
 		if (embedAvroSchema && !submitOnPunct && tuplesPerMessage == 0 && bytesPerMessage == 0 && timePerMessage == 0)
 			throw new Exception("If Avro schema is embedded in the output, you must specify one of the thresholds when "
@@ -356,9 +356,11 @@ public class JSONToAvro extends AbstractOperator {
 			super.processPunctuation(inputStream, mark);
 	}
 
-	static final String DESC = "This operator converts JSON strings into binary Avro messages."
-			+ " If an input or output message attribute is not found or has an incompatible type, the operator will fail."
-			+ " If an invalid JSON string is found in the input, the operator will fail."
-			+ " This operator must not be used inside a consistent region.";
+	static final String DESC = "This operator converts JSON strings into binary Avro messages.\\n\\n"
+			+ "If an input or output message attribute is not found or has an incompatible type, the operator will fail. "
+			+ "If an invalid JSON string is found in the input, the operator will fail if parameter `ignoreParsingError` is false.\\n\\n"
+			+ "If parameter `embedAvroSchema` is false, the operator passes window punctuation marker transparently to the output port. "
+			+ "If parameter `embedAvroSchema` is true, the operator generates window punctuation markers.\\n\\n"
+			+ "This operator must not be used inside a consistent region.";
 
 }

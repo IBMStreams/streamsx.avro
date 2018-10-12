@@ -54,9 +54,9 @@ import com.ibm.streamsx.avro.convert.TupleToAvroConverter;
 
 @PrimitiveOperator(name = TupleToAvro.OPER_NAME, namespace = "com.ibm.streamsx.avro", description = TupleToAvro.DESC)
 @InputPorts({
-		@InputPortSet(description = "Port that ingests tuples", cardinality = 1, optional = false, windowingMode = WindowMode.NonWindowed, windowPunctuationInputMode = WindowPunctuationInputMode.Oblivious) })
+		@InputPortSet(description = "Port that ingests tuples.", cardinality = 1, optional = false, windowingMode = WindowMode.NonWindowed, windowPunctuationInputMode = WindowPunctuationInputMode.Oblivious) })
 @OutputPorts({
-		@OutputPortSet(description = "Port that produces Avro records", cardinality = 1, optional = false, windowPunctuationOutputMode = WindowPunctuationOutputMode.Generating) })
+		@OutputPortSet(description = "Port that produces Avro records.", cardinality = 1, optional = false, windowPunctuationOutputMode = WindowPunctuationOutputMode.Generating) })
 @Icons(location16 = "icons/TupleToAvro_16.gif", location32 = "icons/TupleToAvro_32.gif")
 @Libraries(value = { "opt/downloaded/*" })
 public class TupleToAvro extends AbstractOperator {
@@ -99,29 +99,26 @@ public class TupleToAvro extends AbstractOperator {
 		this.embedAvroSchema = embedAvroSchema;
 	}
 
-	@Parameter(optional = true, description = "Only valid if Avro schema is embedded in the output. When set to true, this "
-			+ "the operator will submit the block of Avro messages what was built and generate a punctuation so that the "
-			+ "receiving operator can potentially create a new file.")
+	@Parameter(optional = true, description = "When set to true, the operator will submit the block of Avro messages what was built and generate a punctuation so that the "
+			+ "receiving operator can potentially create a new file. Default is false. Only valid if Avro schema is embedded in the output.")
 	public void setSubmitOnPunct(Boolean submitOnPunct) {
 		this.submitOnPunct = submitOnPunct;
 	}
 
-	@Parameter(optional = true, description = "Only valid if Avro schema is embedded in the output. This parameter controls "
-			+ "the minimum size in bytes that the Avro message block should be before it is submitted to the output"
-			+ "port.")
+	@Parameter(optional = true, description = "This parameter controls the minimum size in bytes that the Avro message block "
+			+ "should be before it is submitted to the output port. Default is 0l. Only valid if Avro schema is embedded in the output.")
 	public void setBytesPerMessage(Long bytesPerMessage) {
 		this.bytesPerMessage = bytesPerMessage;
 	}
 
-	@Parameter(optional = true, description = "Only valid if Avro schema is embedded in the output. This parameter controls "
-			+ "the minimum number of tuples that the Avro message block should contain before it is submitted to the output"
-			+ "port.")
+	@Parameter(optional = true, description = "This parameter controls the minimum number of tuples that the Avro message "
+			+ "block should contain before it is submitted to the output port. Default is 0l. Only valid if Avro schema is embedded in the output.")
 	public void setTuplesPerMessage(Long tuplesPerMessage) {
 		this.tuplesPerMessage = tuplesPerMessage;
 	}
 
-	@Parameter(optional = true, description = "Only valid if Avro schema is embedded in the output. This parameter controls "
-			+ "the maximum time in seconds before the Avro message block is submitted to the output port.")
+	@Parameter(optional = true, description = "This parameter controls the maximum time in seconds before the Avro message block "
+			+ "is submitted to the output port. Default is 0l. Only valid if Avro schema is embedded in the output.")
 	public void setTimePerMessage(Long timePerMessage) {
 		this.timePerMessage = timePerMessage;
 	}
@@ -203,9 +200,9 @@ public class TupleToAvro extends AbstractOperator {
 		tracer.log(TraceLevel.TRACE, "Submit Avro message block when punctuation is received: " + submitOnPunct);
 
 		// submitOnPunct is only valid if Avro schema is embedded in the output
-		if (submitOnPunct && !embedAvroSchema)
+		if (!embedAvroSchema && ( submitOnPunct || (tuplesPerMessage != 0) || (bytesPerMessage != 0) || (timePerMessage != 0) ) )
 			throw new Exception(
-					"Parameter submitOnPunct can only be set to true if Avro schema is embedded in the output.");
+					"Parameters submitOnPunct, tuplesPerMessage, bytesPerMessage or timePerMessage can only be set if Avro schema is embedded in the output.");
 		// If Avro schema is embedded in the output, submitOnPunct is mandatory
 		if (embedAvroSchema && !submitOnPunct && tuplesPerMessage == 0 && bytesPerMessage == 0 && timePerMessage == 0)
 			throw new Exception("If Avro schema is embedded in the output, you must specify one of the thresholds when "
@@ -320,8 +317,10 @@ public class TupleToAvro extends AbstractOperator {
 	static final String DESC = "This operator converts Streams tuples into binary Avro messages. The input tuples can be"
 			+ "nested types with lists and tuples, but the attribute types must be mappable to the Avro primitive types. "
 			+ "boolean, float32, float64, int32, int64, rstring and ustring are respectively mapped to "
-			+ "Boolean, Float, Double, Integer, Long, String. "
-			+ "If the output message attribute is not found or has no blob type, the operator will fail."
+			+ "Boolean, Float, Double, Integer, Long, String.\\n\\n"
+			+ "If parameter `embedAvroSchema` is false, the operator passes window punctuation marker transparently to the output port. "
+			+ "If parameter `embedAvroSchema` is true, the operator generates window punctuation markers.\\n\\n"
+			+ "If the output message attribute is not found or has no blob type, the operator will fail.\\n\\n"
 			+ "This operator must not be used inside a consistent region.";
 
 }

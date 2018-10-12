@@ -18,23 +18,29 @@ public composite Main {
 		}
 
 		// Convert the Tweet tuple to a JSON string
-		//<JsonEmbedAvroSchema_true JsonEmbedAvroSchema_false>stream<rstring jsonMessage> ConvertTupleToJson = TupleToJSON(GenerateTweet) { }
+		//<JsonEmbedAvroSchema_true JsonEmbedAvroSchema_false*>stream<rstring jsonMessage> ConvertTupleToJson = TupleToJSON(GenerateTweet) { }
 
 		// Batch the incoming tuples into Avro tuples with embedded schema
-		//<JsonEmbedAvroSchema_true JsonEmbedAvroSchema_false>stream<blob avroMessage> ConvertToAvro = JSONToAvro(ConvertTupleToJson) {
-		//<JsonEmbedAvroSchema_true JsonEmbedAvroSchema_false>	param
-		//<JsonEmbedAvroSchema_true JsonEmbedAvroSchema_false>		avroMessageSchemaFile: getApplicationDir()+"/etc/twitter.avsc";
+		//<JsonEmbedAvroSchema_true JsonEmbedAvroSchema_false*>stream<blob avroMessage> ConvertToAvro = JSONToAvro(ConvertTupleToJson) {
+		//<JsonEmbedAvroSchema_true JsonEmbedAvroSchema_false*>	param
+		//<JsonEmbedAvroSchema_true JsonEmbedAvroSchema_false*>		avroMessageSchemaFile: getApplicationDir()+"/etc/twitter.avsc";
 				//<JsonEmbedAvroSchema_true>embedAvroSchema: true;
-				//<JsonEmbedAvroSchema_false>embedAvroSchema: false;
-				//<JsonEmbedAvroSchema_false>submitOnPunct: true;
-		//<JsonEmbedAvroSchema_true JsonEmbedAvroSchema_false>}
-		//<TupleEmbedAvroSchema_true TupleEmbedAvroSchema_false>stream<blob avroMessage> ConvertToAvro = TupleToAvro(GenerateTweet) {
-		//<TupleEmbedAvroSchema_true TupleEmbedAvroSchema_false>	param
-		//<TupleEmbedAvroSchema_true TupleEmbedAvroSchema_false>		avroMessageSchemaFile: getApplicationDir()+"/etc/twitter.avsc";
+				//<JsonEmbedAvroSchema_false*>embedAvroSchema: false;
+				//<JsonEmbedAvroSchema_false0>submitOnPunct: true;
+				//<JsonEmbedAvroSchema_false1>tuplesPerMessage: 5l;
+				//<JsonEmbedAvroSchema_false2>bytesPerMessage: 100l;
+				//<JsonEmbedAvroSchema_false3>timePerMessage: 10l;
+		//<JsonEmbedAvroSchema_true JsonEmbedAvroSchema_false*>}
+		//<TupleEmbedAvroSchema_true TupleEmbedAvroSchema_false*>stream<blob avroMessage> ConvertToAvro = TupleToAvro(GenerateTweet) {
+		//<TupleEmbedAvroSchema_true TupleEmbedAvroSchema_false*>	param
+		//<TupleEmbedAvroSchema_true TupleEmbedAvroSchema_false*>		avroMessageSchemaFile: getApplicationDir()+"/etc/twitter.avsc";
 				//<TupleEmbedAvroSchema_true>embedAvroSchema: true;
-				//<TupleEmbedAvroSchema_false>embedAvroSchema: false;
-				//<TupleEmbedAvroSchema_false>submitOnPunct: true;
-		//<TupleEmbedAvroSchema_true TupleEmbedAvroSchema_false>}
+				//<TupleEmbedAvroSchema_false*>embedAvroSchema: false;
+				//<TupleEmbedAvroSchema_false0>submitOnPunct: true;
+				//<TupleEmbedAvroSchema_false1>tuplesPerMessage: 5l;
+				//<TupleEmbedAvroSchema_false2>bytesPerMessage: 100l;
+				//<TupleEmbedAvroSchema_false3>timePerMessage: 10l;
+		//<TupleEmbedAvroSchema_true TupleEmbedAvroSchema_false*>}
 
 
 	config

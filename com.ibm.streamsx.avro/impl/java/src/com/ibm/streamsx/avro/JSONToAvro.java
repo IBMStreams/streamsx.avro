@@ -1,6 +1,6 @@
 //
 // *******************************************************************************
-// * Copyright (C)2016, International Business Machines Corporation and *
+// * Copyright (C)2018, International Business Machines Corporation and *
 // * others. All Rights Reserved. *
 // *******************************************************************************
 //

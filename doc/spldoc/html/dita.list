@@ -1,4 +1,4 @@
-#Fri Oct 12 17:39:13 CEST 2018
+#Mon Oct 15 16:51:58 CEST 2018
 copytosourcelist=
 hreftargetslist=dita/tk$com.ibm.streamsx.avro/tk$com.ibm.streamsx.avro.xml,dita/tk$com.ibm.streamsx.avro/ix$Operator.xml,dita/tk$com.ibm.streamsx.avro/op$com.ibm.streamsx.avro$AvroToJSON.xml,dita/toolkits/ix$Namespace.xml,dita/toolkits/ix$Operator.xml,dita/tk$com.ibm.streamsx.avro/op$com.ibm.streamsx.avro$JSONToAvro.xml,dita/tk$com.ibm.streamsx.avro/ns$com.ibm.streamsx.avro.xml,dita/tk$com.ibm.streamsx.avro/op$com.ibm.streamsx.avro$TupleToAvro.xml,dita/tk$com.ibm.streamsx.avro/ix$Namespace.xml,dita/toolkits/toolkits.xml,dita/references/OperatorModel.xml
 fullditatopicfile=fullditatopic.list

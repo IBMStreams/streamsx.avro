@@ -14,4 +14,8 @@ sidebar:
 
 ## SPLDOC
 
-[SPLDoc for the com.ibm.streamsx.avro toolkit](https://ibmstreams.github.io/streamsx.avro/doc/spldoc/html/index.html)
+[SPLDoc for the streamsx.avro toolkit](https://ibmstreams.github.io/streamsx.avro/doc/spldoc/html/index.html)
+
+## Samples
+
+[SPLDoc for the samples of streamsx.avro toolkit](https://ibmstreams.github.io/streamsx.avro/samples/doc/spldoc/html/index.html)

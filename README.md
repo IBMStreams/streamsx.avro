@@ -35,3 +35,6 @@ See [Develop](DEVELOPMENT.md)
 * removed parameter `ignoreParsingError` from `TupleToAvro` operator - tuples have a fixed structure
 * removed parameter `avroSchemaEmbedded` from operator `AvroToJSON` - operator expects the embedded avro schema if no schema file is configured
 
+### Version 1.2.1:
+* new testframework allows better individual test case timeout control
+

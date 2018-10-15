@@ -9,7 +9,7 @@
         (or a block of Avro messages with embedded schema). Avro messages are in a binary format, hence they are 
         represented as a Streams `blob` type.
     </info:description>
-    <info:version>1.2.0</info:version>
+    <info:version>1.2.1</info:version>
     <info:requiredProductVersion>4.2.0.0</info:requiredProductVersion>
   </info:identity>
   <info:dependencies/>

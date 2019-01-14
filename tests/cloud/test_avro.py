@@ -16,7 +16,8 @@ class Test(unittest.TestCase):
         print (str(self))
         urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
         self.streams_install = os.environ.get('STREAMS_INSTALL')
-        self.json_toolkit_location = self.streams_install+'/toolkits/com.ibm.streamsx.json'
+        if self.streams_install is not None:
+            self.json_toolkit_location = self.streams_install+'/toolkits/com.ibm.streamsx.json'
 
     def setUp(self):
         Tester.setup_distributed(self)

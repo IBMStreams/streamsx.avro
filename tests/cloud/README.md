@@ -1,0 +1,40 @@
+# streamsx.avro tests
+
+## Before launching the test
+
+Ensure that you have Python 3.5 installed. For example, you can get Python 3.5 from the [Anaconda archive page](https://repo.continuum.io/archive/index.html).
+
+Ensure that the bin directory is added to the PATH environment variable. If necessary, add the bin directory by entering the following command on the command line:
+
+    export PATH="~/anaconda3/bin:$PATH"
+
+Ensure that you have set the following environment variables for testing with Streaming Analytics service in IBM Cloud:
+
+* `STREAMING_ANALYTICS_SERVICE_NAME` - name of your Streaming Analytics service
+* `VCAP_SERVICES` - [VCAP](https://console.bluemix.net/docs/services/StreamingAnalytics/r_vcap_services.html#r_vcap_services) information in JSON format or a JSON file
+
+Ensure that you have set the following environment variables for testing with local Streams instance:
+
+* `STREAMS_USERNAME` - username to connect with local Streams domain
+* `STREAMS_PASSWORD` - password to connect with local Streams domain
+
+### Required Python packages
+
+Python unit test requires TopologyTester from Python streamsx package or com.ibm.streamsx.topology toolkit version 1.11 or later.
+
+Install the latest streamsx package with pip, a package manager for Python, by entering the following command on the command line:
+
+    pip install --user --upgrade streamsx
+
+
+
+## Run the test with Streaming Analytics service and toolkit from this repository
+
+    python3 -u -m unittest test_avro.TestCloud
+
+
+## Run the test with Local Streams instance and toolkit from this repository
+
+    python3 -u -m unittest test_avro.Test
+
+

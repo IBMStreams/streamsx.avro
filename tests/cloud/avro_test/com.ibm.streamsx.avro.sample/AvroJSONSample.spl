@@ -1,0 +1,70 @@
+namespace com.ibm.streamsx.avro.sample ;
+
+use com.ibm.streamsx.avro::* ;
+use com.ibm.streamsx.json::* ;
+
+/**
+ * Convert tuple to JSON, then to Avro and back to JSON. Avro AND JSON output is printed to the console output.
+ */
+composite AvroJSONSample
+{
+	graph
+		stream<rstring result> AvroSampleTest = AvroJSONSampleComp() {
+		}	
+} 
+
+public composite AvroJSONSampleComp (output Result)
+{
+	type 
+		/**
+		 * Sample tuple type
+		 */
+		tweetT = rstring username, rstring tweet, uint64 tweettime;
+
+	graph
+		/* Generate 100 tweets with a changing value for every tweet */
+		stream<tweetT> GenerateTweet = Beacon()
+		{
+			param
+				iterations: 100u;
+			output
+				GenerateTweet : username = "Frank", tweet = "Hi, this is a cool tweet! "
+					+(rstring) IterationCount(), tweettime = 1048298232ul + IterationCount();
+		}
+
+		/* Convert the Tweet tuple to a JSON string */
+		stream<rstring jsonMessage> ConvertTupleToJson = TupleToJSON(GenerateTweet)
+		{
+		}
+
+		/* Convert the JSON string to an Avro message */
+		stream<blob avroMessage> ConvertToAvro = JSONToAvro(ConvertTupleToJson)
+		{
+			param
+				avroMessageSchemaFile: getThisToolkitDir()+"/etc/twitter.avsc";
+		}
+
+		/* Display the Avro message */
+		() as DisplayAvro = Custom(ConvertToAvro as I)
+		{
+			logic
+				onTuple I: println((rstring) I);
+		}
+
+		/* Convert the Avro message to a JSON string */
+		stream<rstring jsonMessage> ConvertToJson = AvroToJSON(ConvertToAvro)
+		{
+			param
+				avroMessageSchemaFile: getThisToolkitDir()+"/etc/twitter.avsc";
+		}
+
+		// Display the retrieved JSON message
+		stream<rstring result> Result = Custom(ConvertToJson as I){
+		logic
+			onTuple I : {
+				println((rstring) I);
+				submit ({result=""}, Result);
+			}
+		}
+
+}

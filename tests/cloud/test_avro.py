@@ -8,6 +8,10 @@ import streamsx.rest as sr
 import os, os.path
 import urllib3
 
+import streamsx.topology.context
+import requests
+from urllib.parse import urlparse
+
 class Test(unittest.TestCase):
     """ Test invocations of composite operators in local Streams instance """
 
@@ -31,6 +35,24 @@ class Test(unittest.TestCase):
         if self.json_toolkit_location is not None:
             tk.add_toolkit(topo, self.json_toolkit_location)
 
+    def _service(self):
+        streams_rest_url = os.environ['STREAMS_REST_URL']
+        streams_inst = os.environ['STREAMS_INSTANCE']
+        streams_user = os.environ['STREAMS_USERNAME']
+        streams_password = os.environ['STREAMS_PASSWORD']
+        uri_parsed = urlparse(streams_rest_url)
+        hostname = uri_parsed.hostname
+        r = requests.get('https://'+hostname+':31843/v1/preauth/validateAuth', auth=(streams_user, streams_password), verify=False)
+        token = r.json()['accessToken']
+        cfg =  {
+            'type':'streams',
+            'connection_info':{
+                'serviceBuildEndpoint':'https://'+hostname+':32085',
+                'serviceRestEndpoint': 'https://'+uri_parsed.netloc+'/streams/rest/instances/'+streams_inst},
+            'service_token': token }
+        cfg[streamsx.topology.context.ConfigParams.FORCE_REMOTE_BUILD] = True
+        return cfg
+
     def _build_launch_app(self, name, composite_name, parameters, num_result_tuples, test_toolkit):
         print ("------ "+name+" ------")
         topo = Topology(name)
@@ -44,6 +66,10 @@ class Test(unittest.TestCase):
         self.tester.tuple_count(test_op.stream, num_result_tuples, exact=False)
 
         cfg = {}
+        if ("TestICP" in str(self)):
+            cfg = self._service()
+
+        # change trace level
         job_config = streamsx.topology.context.JobConfig(tracing='warn')
         job_config.add(cfg)
 
@@ -126,53 +152,39 @@ class TestCloud(Test):
     def setUp(self):
         Tester.setup_streaming_analytics(self, force_remote_build=False)
         self.avro_toolkit_location = "../../com.ibm.streamsx.avro"
-        self.isCloudTest = True
 
-class TestCloudLocal(Test):
+
+class TestCloudLocal(TestCloud):
     """ Test in Streaming Analytics Service using local installed toolkit """
 
     @classmethod
     def setUpClass(self):
-        # start streams service
-        connection = sr.StreamingAnalyticsConnection()
-        service = connection.get_streaming_analytics()
-        result = service.start_instance()
         super().setUpClass()
 
     def setUp(self):
         Tester.setup_streaming_analytics(self, force_remote_build=False)
         self.streams_install = os.environ.get('STREAMS_INSTALL')
         self.avro_toolkit_location = self.streams_install+'/toolkits/com.ibm.streamsx.avro'
-        self.isCloudTest = True
 
 
-class TestCloudLocalRemote(Test):
+class TestCloudLocalRemote(TestCloud):
     """ Test in Streaming Analytics Service using local installed toolkit and remote build """
 
     @classmethod
     def setUpClass(self):
-        # start streams service
-        connection = sr.StreamingAnalyticsConnection()
-        service = connection.get_streaming_analytics()
-        result = service.start_instance()
         super().setUpClass()
 
     def setUp(self):
         Tester.setup_streaming_analytics(self, force_remote_build=True)
         self.streams_install = os.environ.get('STREAMS_INSTALL')
         self.avro_toolkit_location = self.streams_install+'/toolkits/com.ibm.streamsx.avro'
-        self.isCloudTest = True
 
 
-class TestCloudRemote(Test):
+class TestCloudRemote(TestCloud):
     """ Test in Streaming Analytics Service using remote toolkit and remote build """
 
     @classmethod
     def setUpClass(self):
-        # start streams service
-        connection = sr.StreamingAnalyticsConnection()
-        service = connection.get_streaming_analytics()
-        result = service.start_instance()
         super().setUpClass()
 
     def setUp(self):
@@ -180,5 +192,5 @@ class TestCloudRemote(Test):
         # remote toolkit is used
         self.avro_toolkit_location = None
         self.json_toolkit_location = None
-        self.isCloudTest = True
+
 

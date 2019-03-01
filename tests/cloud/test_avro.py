@@ -173,7 +173,7 @@ class TestCloudLocal(TestCloud):
 
 
 class TestCloudLocalRemote(TestCloud):
-    """ Test in Streaming Analytics Service using local installed toolkit and remote build """
+    """ Test in Streaming Analytics Service using local toolkit from repo and remote build """
 
     @classmethod
     def setUpClass(self):
@@ -181,8 +181,8 @@ class TestCloudLocalRemote(TestCloud):
 
     def setUp(self):
         Tester.setup_streaming_analytics(self, force_remote_build=True)
-        self.streams_install = os.environ.get('STREAMS_INSTALL')
-        self.avro_toolkit_location = self.streams_install+'/toolkits/com.ibm.streamsx.avro'
+        self.avro_toolkit_location = "../../com.ibm.streamsx.avro"
+        self.json_toolkit_location = os.environ["JSON_TOOLKIT_HOME"]
 
 
 class TestCloudRemote(TestCloud):

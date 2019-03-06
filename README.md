@@ -38,3 +38,6 @@ See [Develop](DEVELOPMENT.md)
 ### Version 1.2.1:
 * new testframework allows better individual test case timeout control
 
+### Version 1.2.2:
+* Resolved vulenaribility issue #29
+

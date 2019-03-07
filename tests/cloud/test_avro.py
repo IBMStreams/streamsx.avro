@@ -25,8 +25,11 @@ class Test(unittest.TestCase):
 
     def setUp(self):
         Tester.setup_distributed(self)
-        self.avro_toolkit_location = "../../com.ibm.streamsx.avro"
         self.isCloudTest = False
+        if os.environ.get('STREAMSX_AVRO_TOOLKIT') is None:
+            self.avro_toolkit_location = "../../com.ibm.streamsx.avro"
+        else:
+            self.avro_toolkit_location = os.environ.get('STREAMSX_AVRO_TOOLKIT')
 
     def _add_toolkits(self, topo, test_toolkit):
         tk.add_toolkit(topo, test_toolkit)
@@ -62,7 +65,7 @@ class Test(unittest.TestCase):
         print ("------ "+name+" ------")
         topo = Topology(name)
         self._add_toolkits(topo, test_toolkit)
-	
+
         params = parameters
         # Call the test composite
         test_op = op.Source(topo, composite_name, 'tuple<rstring result>', params=params)
@@ -79,11 +82,11 @@ class Test(unittest.TestCase):
         job_config.add(cfg)
 
         if ("Cloud" not in str(self)):
-            cfg[streamsx.topology.context.ConfigParams.SSL_VERIFY] = False     
+            cfg[streamsx.topology.context.ConfigParams.SSL_VERIFY] = False
 
         # Run the test
         test_res = self.tester.test(self.test_ctxtype, cfg, assert_on_fail=True, always_collect_logs=True)
-        print (str(self.tester.result))        
+        print (str(self.tester.result))
         assert test_res, name+" FAILED ("+self.tester.result["application_logs"]+")"
 
 
@@ -156,7 +159,10 @@ class TestCloud(Test):
 
     def setUp(self):
         Tester.setup_streaming_analytics(self, force_remote_build=False)
-        self.avro_toolkit_location = "../../com.ibm.streamsx.avro"
+        if os.environ.get('STREAMSX_AVRO_TOOLKIT') is None:
+            self.avro_toolkit_location = "../../com.ibm.streamsx.avro"
+        else:
+            self.avro_toolkit_location = os.environ.get('STREAMSX_AVRO_TOOLKIT')
 
 
 class TestCloudLocal(TestCloud):
@@ -197,5 +203,3 @@ class TestCloudRemote(TestCloud):
         # remote toolkit is used
         self.avro_toolkit_location = None
         self.json_toolkit_location = None
-
-

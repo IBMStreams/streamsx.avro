@@ -83,21 +83,21 @@ class TestLocal(Test):
 
 
 class TestICP(Test):
-    """ Test in ICP env using local toolkit (repo) """
+    """ Test in CP4D env using local toolkit (repo) """
 
     @classmethod
     def setUpClass(self):
         super().setUpClass()
         env_chk = True
         try:
-            print("STREAMS_REST_URL="+str(os.environ['STREAMS_REST_URL']))
+            print("CP4D_URL="+str(os.environ['CP4D_URL']))
         except KeyError:
             env_chk = False
-        assert env_chk, "STREAMS_REST_URL environment variable must be set"
+        assert env_chk, "CP4D_URL environment variable must be set"
 
 
 class TestICPLocal(TestICP):
-    """ Test in ICP env using local installed toolkit (STREAMS_INSTALL/toolkits) """
+    """ Test in CP4D env using local installed toolkit (STREAMS_INSTALL/toolkits) """
 
     @classmethod
     def setUpClass(self):
@@ -110,7 +110,7 @@ class TestICPLocal(TestICP):
 
 
 class TestICPRemote(TestICP):
-    """ Test in ICP env using remote toolkit (build service) """
+    """ Test in CP4D env using remote toolkit (build service) """
 
     @classmethod
     def setUpClass(self):

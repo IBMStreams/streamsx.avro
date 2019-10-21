@@ -43,7 +43,7 @@ myEval() {
 	
 	case "$TTRO_variantCase" in
 	embedAvroSchema_false)
-		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" '' '*java.io.IOException: Not a data file*';;
+		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" '' '*org.apache.avro.InvalidAvroMagicException: Not an Avro data file*';;
 	inputNoAvroMessage)
 		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" '' '*avroMessage*not exist*';;
 	inputNoBlob)

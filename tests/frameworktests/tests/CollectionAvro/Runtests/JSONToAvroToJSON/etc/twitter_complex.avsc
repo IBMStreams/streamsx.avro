@@ -10,12 +10,11 @@
   	{"name" : "location", "doc" : "Location record", "type" : {
   		"name" : "locationType", "type" : "record",
   		"fields" : [
-  			{"name" : "country", "type" : "string", "default" : null },
+  			{"name" : "country", "type" : "string", "default" : "" },
   			{"name" : "lat", "type" : "float", "default" : 0.0 },
   			{"name" : "lon", "type" : "float", "default" : 0.0 }
   		]
-  	},
-  	"default" : null},
+  	}},
   	{"name" : "retweets", "doc" : "List of users who retweeted", "type" : {"type" : "array", "items" : "string" }},
   	{"name" : "followers", "doc" : "List of followers for this user", "type" : {"type" : "array", "items" : {
   		"name" : "followersType", "type" : "record",

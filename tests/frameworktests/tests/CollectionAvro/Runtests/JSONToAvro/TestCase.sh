@@ -33,7 +33,7 @@ checkContent() {
 	local i
 	local reference actval
 	for ((i=0; i<100; i++)); do
-		java -jar "$TTRO_inputDir/../avro-tools-1.8.2.jar" 'tojson' "data/AvroFile_$i" > "data/CompFile_$i"
+		java -jar "$TTRO_inputDir/../avro-tools-1.9.1.jar" 'tojson' "data/AvroFile_$i" > "data/CompFile_$i"
 		reference="$(jq '.username' "data/JsonFile_$i")"
 		actval="$(jq '.username' "data/CompFile_$i")"
 		if [[ $actval == $reference ]]; then

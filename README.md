@@ -41,3 +41,7 @@ See [Develop](DEVELOPMENT.md)
 ### Version 1.2.2:
 * Resolved vulenaribility issue #29
 
+### Version 1.3.0:
+* Resolved vulenaribility issue #36
+* Update to Avro version 1.9.1
+

@@ -9,11 +9,11 @@ STEPS=(
 myEval() {
 	case "$TTRO_variantCase" in
 	AvroToJSON)
-		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" 'ERROR: AvroToJSON operator cannot be used inside a consistent region';;
+		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" '*CDIST3450E*';;
 	JSONToAvro)
-		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" 'ERROR: JSONToAvro operator cannot be used inside a consistent region';;
+		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" '*CDIST3450E*';;
 	TupleToAvro)
-		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" 'ERROR: TupleToAvro operator cannot be used inside a consistent region';;
+		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" '*CDIST3450E*';;
 	*)
 		printErrorAndExit "Wrong case variant" $errRt
 	esac

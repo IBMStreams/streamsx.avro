@@ -142,7 +142,7 @@ public class TupleToAvro extends AbstractOperator {
 	public static void checkInConsistentRegion(OperatorContextChecker checker) {
 		ConsistentRegionContext consistentRegionContext = checker.getOperatorContext().getOptionalContext(ConsistentRegionContext.class);
 		if(consistentRegionContext != null) {
-			checker.setInvalidContext(OPER_NAME + " operator cannot be used inside a consistent region", new Object[]{});
+			checker.setInvalidContext(Messages.getString("AVRO_NOT_CONSISTENT_REGION", OPER_NAME), new Object[]{});
 		}
 	}
 

@@ -79,7 +79,9 @@
 	</target>
 
 	<target name="jar" depends="compile">
-		<jar destfile="${impl.lib.dir}/${jarfile}" basedir="${build.dir}" includes="com/ibm/streamsx/avro/**" filesonly="true" />
+		<jar destfile="${impl.lib.dir}/${jarfile}" basedir="${build.dir}" includes="com/ibm/streamsx/avro/**" filesonly="true">
+		   <fileset dir="${src.dir}" includes="com/ibm/streamsx/avro/messages/*.properties"/>
+		</jar>
 	</target>
 
 	<target name="toolkit" depends="jar">

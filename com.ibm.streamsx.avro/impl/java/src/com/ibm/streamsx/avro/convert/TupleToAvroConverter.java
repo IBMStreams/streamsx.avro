@@ -25,6 +25,7 @@ import com.ibm.streams.operator.log4j.TraceLevel;
 import com.ibm.streams.operator.meta.CollectionType;
 import com.ibm.streams.operator.meta.TupleType;
 import com.ibm.streams.operator.types.RString;
+import com.ibm.streamsx.avro.Messages;
 
 public class TupleToAvroConverter {
 
@@ -61,59 +62,51 @@ public class TupleToAvroConverter {
 		Schema.Type avroSchemaType = avroSchema.getType();
 		LOGGER.log(TraceLevel.TRACE, "Checking attribute: " + attributeName + ", type: " + tupleAttributeType
 				+ ", metatype: " + attributeMetaType + ". Avro type is: " + avroSchemaType);
-		if (!SupportedTypes.SUPPORTED_STREAMS_TYPES.contains(attributeMetaType)) {
-			LOGGER.log(TraceLevel.ERROR, "Type " + tupleAttributeType + " of attribute " + attributeName
-					+ " is not supported. Valid attribute types are: " + SupportedTypes.SUPPORTED_STREAMS_TYPES);
+		if (!SupportedTypes.SUPPORTED_STREAMS_TYPES.contains(attributeMetaType)) {		
+			LOGGER.log(TraceLevel.ERROR, Messages.getString ("AVRO_TYPE_NOT_SUPPORTED", tupleAttributeType, attributeName, SupportedTypes.SUPPORTED_STREAMS_TYPES));
 			validMapping = false;
 		} else {
 			switch (attributeMetaType) {
 			case BOOLEAN:
 				if (avroSchemaType != Schema.Type.BOOLEAN) {
-					LOGGER.log(TraceLevel.ERROR, "boolean attribute " + attributeName
-							+ " must be mapped to an Avro Boolean type. " + "Avro type is " + avroSchemaType);
+					LOGGER.log(TraceLevel.ERROR, Messages.getString ("AVRO_WRONG_MAPPING", "boolean attribute " + attributeName, "Boolean type", avroSchemaType));
 					validMapping = false;
 				}
 				break;
 			case FLOAT32:
 				if (avroSchemaType != Schema.Type.FLOAT) {
-					LOGGER.log(TraceLevel.ERROR, "float32 attribute " + attributeName
-							+ " must be mapped to an Avro Float type. " + "Avro type is " + avroSchemaType);
+					LOGGER.log(TraceLevel.ERROR, Messages.getString ("AVRO_WRONG_MAPPING", "float32 attribute " + attributeName, "Float type", avroSchemaType));
 					validMapping = false;
 				}
 				break;
 			case FLOAT64:
 				if (avroSchemaType != Schema.Type.DOUBLE) {
-					LOGGER.log(TraceLevel.ERROR, "float64 attribute " + attributeName
-							+ " must be mapped to an Avro Double type. " + "Avro type is " + avroSchemaType);
+					LOGGER.log(TraceLevel.ERROR, Messages.getString ("AVRO_WRONG_MAPPING", "float64 attribute " + attributeName, "Double type", avroSchemaType));
 					validMapping = false;
 				}
 				break;
 			case INT32:
 				if (avroSchemaType != Schema.Type.INT) {
-					LOGGER.log(TraceLevel.ERROR, "int32 attribute " + attributeName
-							+ " must be mapped to an Avro Integer type. " + "Avro type is " + avroSchemaType);
+					LOGGER.log(TraceLevel.ERROR, Messages.getString ("AVRO_WRONG_MAPPING", "int32 attribute " + attributeName, "Integer type", avroSchemaType));
 					validMapping = false;
 				}
 				break;
 			case INT64:
 				if (avroSchemaType != Schema.Type.LONG) {
-					LOGGER.log(TraceLevel.ERROR, "int64 attribute " + attributeName
-							+ " must be mapped to an Avro Long type. " + "Avro type is " + avroSchemaType);
+					LOGGER.log(TraceLevel.ERROR, Messages.getString ("AVRO_WRONG_MAPPING", "int64 attribute " + attributeName, "Long type", avroSchemaType));
 					validMapping = false;
 				}
 				break;
 			case RSTRING:
 			case USTRING:
 				if (avroSchemaType != Schema.Type.STRING) {
-					LOGGER.log(TraceLevel.ERROR, "rstring or ustring attribute " + attributeName
-							+ " must be mapped to an Avro String type. " + "Avro type is " + avroSchemaType);
+					LOGGER.log(TraceLevel.ERROR, Messages.getString ("AVRO_WRONG_MAPPING", "rstring or ustring attribute " + attributeName, "String type", avroSchemaType));
 					validMapping = false;
 				}
 				break;
 			case TUPLE:
 				if (avroSchemaType != Schema.Type.RECORD) {
-					LOGGER.log(TraceLevel.ERROR, "tuple attribute " + attributeName
-							+ " must be mapped to an Avro Record type. " + "Avro type is " + avroSchemaType);
+					LOGGER.log(TraceLevel.ERROR, Messages.getString ("AVRO_WRONG_MAPPING", "tuple attribute " + attributeName, "Record type", avroSchemaType));
 					validMapping = false;
 				} else {
 					StreamSchema subStreamSchema = ((TupleType) tupleAttributeType).getTupleSchema();
@@ -123,8 +116,7 @@ public class TupleToAvroConverter {
 				break;
 			case LIST:
 				if (avroSchemaType != Schema.Type.ARRAY) {
-					LOGGER.log(TraceLevel.ERROR, "list<> attribute " + attributeName
-							+ " must be mapped to an Avro Array type. " + "Avro type is " + avroSchemaType);
+					LOGGER.log(TraceLevel.ERROR, Messages.getString ("AVRO_WRONG_MAPPING", "list<> attribute " + attributeName, "Array type", avroSchemaType));
 					validMapping = false;
 				} else {
 					// Obtain the type of the elements contained in the Streams

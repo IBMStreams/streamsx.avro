@@ -174,11 +174,13 @@ public class TupleToAvro extends AbstractOperator {
 		}
 		Attribute outputAvroMessageAttribute = ssOp0.getAttribute(outputAvroMessage);
 		if (outputAvroMessageAttribute == null) {
-			throw new IllegalArgumentException("No outputAvroMessage attribute `" + outputAvroMessage + "` found in output stream.");
+			tracer.log(TraceLevel.ERROR, Messages.getString("AVRO_OUTPUT_ATTRIBUTE_NOT_FOUND", "outputAvroMessage", outputAvroMessage));
+			throw new IllegalArgumentException(Messages.getString("AVRO_OUTPUT_ATTRIBUTE_NOT_FOUND", "outputAvroMessage", outputAvroMessage));
 		} else {
 			MetaType attributeType = outputAvroMessageAttribute.getType().getMetaType();
 			if(attributeType!=MetaType.BLOB) {
-				throw new IllegalArgumentException("outputAvroMessage attribute `" + outputAvroMessage + "` must have a blob type.");
+				tracer.log(TraceLevel.ERROR, Messages.getString("AVRO_ATTRIBUTE_WRONG_TYPE", "outputAvroMessage", outputAvroMessage, "blob"));
+				throw new IllegalArgumentException(Messages.getString("AVRO_ATTRIBUTE_WRONG_TYPE", "outputAvroMessage", outputAvroMessage, "blob"));
 			}
 		}
 		tracer.log(TraceLevel.TRACE, "Output Avro message attribute: " + outputAvroMessage);

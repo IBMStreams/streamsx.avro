@@ -28,15 +28,15 @@ esac
 checkOutput() {
 	case "$TTRO_variantCase" in
 	jsonInputNoJsonMessage)
-		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" '*ERROR*java.lang.IllegalArgumentException: No inputJsonMessage attribute `jsonMessage` found in input stream.*';;
+		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" '*CDIST3454E*';;
 	jsonInputTypeWrong)
-		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" '*ERROR*java.lang.IllegalArgumentException: inputJsonMessage attribute `tweettime` must have a rstring or ustring type.*';;
+		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" '*CDIST3455E*';;
 	tupleInputTypeWrong)
-		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" '*ERROR*Type UINT64:uint64 of attribute tweettime is not supported.*';;
+		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" '*CDIST3452E*';;
 	*OutputAttrNotExists)
-		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" '*ERROR*No outputAvroMessage attribute `myAvroMessage` found in output stream.*';;
+		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" '*CDIST3453E*';;
 	*OutputAttrNoBlob)
-		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" '*ERROR*outputAvroMessage attribute `avroMessage` must have a blob type.*';;
+		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" '*CDIST3455E*';;
 	*)
 		printErrorAndExit "Wrong variant $TTRO_variantCase" $errRt;;
 	esac

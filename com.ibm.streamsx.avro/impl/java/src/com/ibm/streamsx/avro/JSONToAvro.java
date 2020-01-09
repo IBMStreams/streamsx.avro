@@ -239,12 +239,10 @@ public class JSONToAvro extends AbstractOperator {
 
 		// submitOnPunct.. is only valid if Avro schema is embedded in the output
 		if (!embedAvroSchema && ( submitOnPunct || (tuplesPerMessage != 0) || (bytesPerMessage != 0) || (timePerMessage != 0) ) )
-			throw new Exception(
-					"Parameters submitOnPunct, tuplesPerMessage, bytesPerMessage or timePerMessage can only be set if Avro schema is embedded in the output.");
+			throw new Exception(Messages.getString("AVRO_EMBEDDED_SCHEMA_REQUIRED","submitOnPunct, bytesPerMessage, timePerMessage, tuplesPerMessage"));
 		// If Avro schema is embedded in the output, submitOnPunct is mandatory
 		if (embedAvroSchema && !submitOnPunct && tuplesPerMessage == 0 && bytesPerMessage == 0 && timePerMessage == 0)
-			throw new Exception("If Avro schema is embedded in the output, you must specify one of the thresholds when "
-					+ "the tuple must be submitted (submitOnPunct, bytesPerMessage, timePerMessage, tuplesPerMessage).");
+			throw new Exception(Messages.getString("AVRO_MISSING_THRESHOLD","submitOnPunct, bytesPerMessage, timePerMessage, tuplesPerMessage"));
 
 		// Prepare and initialize variables that don't change for every input
 		// record

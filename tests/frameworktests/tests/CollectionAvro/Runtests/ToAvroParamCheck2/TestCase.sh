@@ -14,9 +14,9 @@ STEPS=(
 checkOutput() {
 	case "$TTRO_variantCase" in
 	*EmbedAvroSchema_true)
-		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" "*ERROR*If Avro schema is embedded in the output, you must specify one of the thresholds when the tuple must be submitted (submitOnPunct, bytesPerMessage, timePerMessage, tuplesPerMessage).*";;
+		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" "*CDIST3457E*";;
 	*EmbedAvroSchema_false*)
-		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" "*ERROR*Parameters submitOnPunct, tuplesPerMessage, bytesPerMessage or timePerMessage can only be set if Avro schema is embedded in the output.";;
+		linewisePatternMatchInterceptAndSuccess "$TT_evaluationFile" "true" "*CDIST3456E*";;
 	*)
 		printErrorAndExit "Wrong variant $TTRO_variantCase" $errRt;;
 	esac

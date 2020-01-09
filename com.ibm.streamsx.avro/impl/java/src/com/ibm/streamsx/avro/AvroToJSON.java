@@ -221,7 +221,7 @@ public class AvroToJSON extends AbstractOperator {
 
 		// If the schema is embedded in the message, the schema file must not be specified
 		if (!avroSchemaEmbedded && avroKeySchemaFile.isEmpty() && (inputAvroKey != null))
-			throw new IllegalArgumentException("Operator mode is No Avro Schema Embedded, inputAvroKey is present but no parameter avroKeySchemaFile is present.");
+			throw new IllegalArgumentException(Messages.getString("AVRO_NO_SCHEMA_FILE"));
 		
 		tracer.log(TraceLevel.TRACE, "AvroToJSON operator initialized, ready to receive tuples");
 

@@ -45,3 +45,5 @@ See [Develop](DEVELOPMENT.md)
 * Resolved vulenaribility issue #36
 * Update to Avro version 1.9.1
 
+### Version 1.4.0:
+* Globalization support: Error messages externalized

@@ -163,7 +163,7 @@ public class JSONToAvro extends AbstractOperator {
 	public static void checkInConsistentRegion(OperatorContextChecker checker) {
 		ConsistentRegionContext consistentRegionContext = checker.getOperatorContext().getOptionalContext(ConsistentRegionContext.class);
 		if(consistentRegionContext != null) {
-			checker.setInvalidContext(OPER_NAME + " operator cannot be used inside a consistent region", new Object[]{});
+			checker.setInvalidContext(Messages.getString("AVRO_NOT_CONSISTENT_REGION", OPER_NAME), new Object[]{});
 		}
 	}
 	
@@ -196,11 +196,13 @@ public class JSONToAvro extends AbstractOperator {
 		tracer.log(TraceLevel.TRACE, "Input JSON message attribute: " + inputJsonMessage);
 		Attribute inputJsonMessageAttribute = ssIp0.getAttribute(inputJsonMessage);
 		if (inputJsonMessageAttribute == null) {
-			throw new IllegalArgumentException("No inputJsonMessage attribute `" + inputJsonMessage + "` found in input stream.");
+			tracer.log(TraceLevel.ERROR, Messages.getString("AVRO_INPUT_ATTRIBUTE_NOT_FOUND", "inputJsonMessage", inputJsonMessage));
+			throw new IllegalArgumentException(Messages.getString("AVRO_INPUT_ATTRIBUTE_NOT_FOUND", "inputJsonMessage", inputJsonMessage));
 		} else {
 			MetaType attributeType = inputJsonMessageAttribute.getType().getMetaType();
 			if (attributeType!=MetaType.RSTRING && attributeType!=MetaType.USTRING) {
-				throw new IllegalArgumentException("inputJsonMessage attribute `" + inputJsonMessage + "` must have a rstring or ustring type.");
+				tracer.log(TraceLevel.ERROR, Messages.getString("AVRO_ATTRIBUTE_WRONG_TYPE", "inputJsonMessage", inputJsonMessage, "rstring or ustring"));
+				throw new IllegalArgumentException(Messages.getString("AVRO_ATTRIBUTE_WRONG_TYPE", "inputJsonMessage", inputJsonMessage, "rstring or ustring"));
 			}
 		}
 
@@ -215,11 +217,13 @@ public class JSONToAvro extends AbstractOperator {
 		tracer.log(TraceLevel.TRACE, "Output Avro message attribute: " + outputAvroMessage);
 		Attribute outputAvroMessageAttribute = ssOp0.getAttribute(outputAvroMessage);
 		if (outputAvroMessageAttribute == null) {
-			throw new IllegalArgumentException("No outputAvroMessage attribute `" + outputAvroMessage + "` found in output stream.");
+			tracer.log(TraceLevel.ERROR, Messages.getString("AVRO_OUTPUT_ATTRIBUTE_NOT_FOUND", "outputAvroMessage", outputAvroMessage));
+			throw new IllegalArgumentException(Messages.getString("AVRO_OUTPUT_ATTRIBUTE_NOT_FOUND", "outputAvroMessage", outputAvroMessage));
 		} else {
 			MetaType attributeType = outputAvroMessageAttribute.getType().getMetaType();
 			if(attributeType!=MetaType.BLOB) {
-				throw new IllegalArgumentException("outputAvroMessage attribute `" + outputAvroMessage + "` must have a blob type.");
+				tracer.log(TraceLevel.ERROR, Messages.getString("AVRO_ATTRIBUTE_WRONG_TYPE", "outputAvroMessage", outputAvroMessage, "blob"));
+				throw new IllegalArgumentException(Messages.getString("AVRO_ATTRIBUTE_WRONG_TYPE", "outputAvroMessage", outputAvroMessage, "blob"));
 			}
 		}
 
@@ -235,12 +239,10 @@ public class JSONToAvro extends AbstractOperator {
 
 		// submitOnPunct.. is only valid if Avro schema is embedded in the output
 		if (!embedAvroSchema && ( submitOnPunct || (tuplesPerMessage != 0) || (bytesPerMessage != 0) || (timePerMessage != 0) ) )
-			throw new Exception(
-					"Parameters submitOnPunct, tuplesPerMessage, bytesPerMessage or timePerMessage can only be set if Avro schema is embedded in the output.");
+			throw new Exception(Messages.getString("AVRO_EMBEDDED_SCHEMA_REQUIRED","submitOnPunct, bytesPerMessage, timePerMessage, tuplesPerMessage"));
 		// If Avro schema is embedded in the output, submitOnPunct is mandatory
 		if (embedAvroSchema && !submitOnPunct && tuplesPerMessage == 0 && bytesPerMessage == 0 && timePerMessage == 0)
-			throw new Exception("If Avro schema is embedded in the output, you must specify one of the thresholds when "
-					+ "the tuple must be submitted (submitOnPunct, bytesPerMessage, timePerMessage, tuplesPerMessage).");
+			throw new Exception(Messages.getString("AVRO_MISSING_THRESHOLD","submitOnPunct, bytesPerMessage, timePerMessage, tuplesPerMessage"));
 
 		// Prepare and initialize variables that don't change for every input
 		// record

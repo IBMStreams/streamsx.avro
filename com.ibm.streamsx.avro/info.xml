@@ -2,14 +2,25 @@
 <info:toolkitInfoModel xmlns:common="http://www.ibm.com/xmlns/prod/streams/spl/common" xmlns:info="http://www.ibm.com/xmlns/prod/streams/spl/toolkitInfo">
   <info:identity>
     <info:name>com.ibm.streamsx.avro</info:name>
-    <info:description>
-        This toolkit supports serialization and deserialization of messages in an Apache Avro format. 
-        It provides the operators `AvroToJSON`, `JSONToAvro` and `TupleToAvro`, which respectively are used to convert an Avro message 
-        (with or without embedded schema) to a JSON string or a Tuple and a JSON string into an Avro message 
-        (or a block of Avro messages with embedded schema). Avro messages are in a binary format, hence they are 
-        represented as a Streams `blob` type.
-    </info:description>
-    <info:version>1.3.0</info:version>
+    <info:description><![CDATA[
+This toolkit supports serialization and deserialization of messages in an Apache Avro format. 
+It provides the operators `AvroToJSON`, `JSONToAvro` and `TupleToAvro`, which respectively are used to convert an Avro message 
+(with or without embedded schema) to a JSON string or a Tuple and a JSON string into an Avro message 
+(or a block of Avro messages with embedded schema). Avro messages are in a binary format, hence they are 
+represented as a Streams `blob` type.
+
+# Additional information
+
++ What's new
+
+This is an overview of changes for major and minor version upgrades. For details see the Releases in public Github.
+
+++ What is new in version 1.4.0
+
+* Globalization support: Error messages externalized
+
+]]></info:description>
+    <info:version>1.4.0</info:version>
     <info:requiredProductVersion>4.2.0.0</info:requiredProductVersion>
   </info:identity>
   <info:dependencies/>

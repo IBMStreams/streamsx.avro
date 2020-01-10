@@ -142,7 +142,7 @@ public class TupleToAvro extends AbstractOperator {
 	public static void checkInConsistentRegion(OperatorContextChecker checker) {
 		ConsistentRegionContext consistentRegionContext = checker.getOperatorContext().getOptionalContext(ConsistentRegionContext.class);
 		if(consistentRegionContext != null) {
-			checker.setInvalidContext(OPER_NAME + " operator cannot be used inside a consistent region", new Object[]{});
+			checker.setInvalidContext(Messages.getString("AVRO_NOT_CONSISTENT_REGION", OPER_NAME), new Object[]{});
 		}
 	}
 
@@ -174,11 +174,13 @@ public class TupleToAvro extends AbstractOperator {
 		}
 		Attribute outputAvroMessageAttribute = ssOp0.getAttribute(outputAvroMessage);
 		if (outputAvroMessageAttribute == null) {
-			throw new IllegalArgumentException("No outputAvroMessage attribute `" + outputAvroMessage + "` found in output stream.");
+			tracer.log(TraceLevel.ERROR, Messages.getString("AVRO_OUTPUT_ATTRIBUTE_NOT_FOUND", "outputAvroMessage", outputAvroMessage));
+			throw new IllegalArgumentException(Messages.getString("AVRO_OUTPUT_ATTRIBUTE_NOT_FOUND", "outputAvroMessage", outputAvroMessage));
 		} else {
 			MetaType attributeType = outputAvroMessageAttribute.getType().getMetaType();
 			if(attributeType!=MetaType.BLOB) {
-				throw new IllegalArgumentException("outputAvroMessage attribute `" + outputAvroMessage + "` must have a blob type.");
+				tracer.log(TraceLevel.ERROR, Messages.getString("AVRO_ATTRIBUTE_WRONG_TYPE", "outputAvroMessage", outputAvroMessage, "blob"));
+				throw new IllegalArgumentException(Messages.getString("AVRO_ATTRIBUTE_WRONG_TYPE", "outputAvroMessage", outputAvroMessage, "blob"));
 			}
 		}
 		tracer.log(TraceLevel.TRACE, "Output Avro message attribute: " + outputAvroMessage);
@@ -193,7 +195,7 @@ public class TupleToAvro extends AbstractOperator {
 		boolean validMapping = TupleToAvroConverter.isValidTupleToAvroMapping(operatorContext.getName(), ssIp0,
 				messageSchema);
 		if (!validMapping) {
-			throw new Exception("Streams input tuple schema cannot be mapped to Avro output schema.");
+			throw new Exception(Messages.getString("AVRO_NO_SCHEMA_MATCH"));
 		}
 
 		tracer.log(TraceLevel.TRACE, "Embed Avro schema in generated output Avro message block: " + embedAvroSchema);
@@ -201,12 +203,10 @@ public class TupleToAvro extends AbstractOperator {
 
 		// submitOnPunct is only valid if Avro schema is embedded in the output
 		if (!embedAvroSchema && ( submitOnPunct || (tuplesPerMessage != 0) || (bytesPerMessage != 0) || (timePerMessage != 0) ) )
-			throw new Exception(
-					"Parameters submitOnPunct, tuplesPerMessage, bytesPerMessage or timePerMessage can only be set if Avro schema is embedded in the output.");
+			throw new Exception(Messages.getString("AVRO_EMBEDDED_SCHEMA_REQUIRED","submitOnPunct, bytesPerMessage, timePerMessage, tuplesPerMessage"));
 		// If Avro schema is embedded in the output, submitOnPunct is mandatory
 		if (embedAvroSchema && !submitOnPunct && tuplesPerMessage == 0 && bytesPerMessage == 0 && timePerMessage == 0)
-			throw new Exception("If Avro schema is embedded in the output, you must specify one of the thresholds when "
-					+ "the tuple must be submitted (submitOnPunct, bytesPerMessage, timePerMessage, tuplesPerMessage).");
+			throw new Exception(Messages.getString("AVRO_MISSING_THRESHOLD","submitOnPunct, bytesPerMessage, timePerMessage, tuplesPerMessage"));
 
 		// Prepare and initialize variables that don't change for every input
 		// record

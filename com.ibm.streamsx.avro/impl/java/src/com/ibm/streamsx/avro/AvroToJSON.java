@@ -122,7 +122,7 @@ public class AvroToJSON extends AbstractOperator {
 	public static void checkInConsistentRegion(OperatorContextChecker checker) {
 		ConsistentRegionContext consistentRegionContext = checker.getOperatorContext().getOptionalContext(ConsistentRegionContext.class);
 		if(consistentRegionContext != null) {
-			checker.setInvalidContext(OPER_NAME + " operator cannot be used inside a consistent region", new Object[]{});
+			checker.setInvalidContext(Messages.getString("AVRO_NOT_CONSISTENT_REGION", OPER_NAME), new Object[]{});
 		}
 	}
 
@@ -173,11 +173,13 @@ public class AvroToJSON extends AbstractOperator {
 		tracer.log(TraceLevel.TRACE, "Output JSON message attribute: " + outputJsonMessage);
 		Attribute outputJsonMessageAttribute = ssOp0.getAttribute(outputJsonMessage);
 		if (outputJsonMessageAttribute == null) {
-			throw new IllegalArgumentException("No outputJsonMessage attribute `" + outputJsonMessage + "` found in output stream.");
+			tracer.log(TraceLevel.ERROR, Messages.getString("AVRO_OUTPUT_ATTRIBUTE_NOT_FOUND", "outputJsonMessage", outputJsonMessage));
+			throw new IllegalArgumentException(Messages.getString("AVRO_OUTPUT_ATTRIBUTE_NOT_FOUND", "outputJsonMessage", outputJsonMessage));
 		} else {
 			MetaType attributeType = outputJsonMessageAttribute.getType().getMetaType();
 			if(attributeType!=MetaType.USTRING && attributeType!=MetaType.RSTRING) {
-				throw new IllegalArgumentException("outputJsonMessage attribute `" + outputJsonMessage + "` must have a rstring or ustring type.");
+				tracer.log(TraceLevel.ERROR, Messages.getString("AVRO_ATTRIBUTE_WRONG_TYPE", "outputJsonMessage", outputJsonMessage, "rstring or ustring"));
+				throw new IllegalArgumentException(Messages.getString("AVRO_ATTRIBUTE_WRONG_TYPE", "outputJsonMessage", outputJsonMessage, "rstring or ustring"));
 			}
 		}
 
@@ -192,11 +194,13 @@ public class AvroToJSON extends AbstractOperator {
 			tracer.log(TraceLevel.TRACE, "Output JSON key attribute: " + outputJsonKey);
 			Attribute attribute = ssOp0.getAttribute(outputJsonKey);
 			if (attribute == null) {
-				throw new IllegalArgumentException("No outputJsonKey attribute `" + outputJsonKey + "` found in output stream");
+				tracer.log(TraceLevel.ERROR, Messages.getString("AVRO_OUTPUT_ATTRIBUTE_NOT_FOUND", "outputJsonKey", outputJsonKey));
+				throw new IllegalArgumentException(Messages.getString("AVRO_OUTPUT_ATTRIBUTE_NOT_FOUND", "outputJsonKey", outputJsonKey));
 			} else {
 				MetaType attributeType = attribute.getType().getMetaType();
 				if(attributeType!=MetaType.USTRING && attributeType!=MetaType.RSTRING) {
-					throw new IllegalArgumentException("outputJsonKey attribute " + outputJsonKey + " must have a rstring or ustring type");
+					tracer.log(TraceLevel.ERROR, Messages.getString("AVRO_ATTRIBUTE_WRONG_TYPE", "outputJsonKey", outputJsonKey, "rstring or ustring"));
+					throw new IllegalArgumentException(Messages.getString("AVRO_ATTRIBUTE_WRONG_TYPE", "outputJsonKey", outputJsonKey, "rstring or ustring"));
 				}
 			}
 		}
@@ -217,7 +221,7 @@ public class AvroToJSON extends AbstractOperator {
 
 		// If the schema is embedded in the message, the schema file must not be specified
 		if (!avroSchemaEmbedded && avroKeySchemaFile.isEmpty() && (inputAvroKey != null))
-			throw new IllegalArgumentException("Operator mode is No Avro Schema Embedded, inputAvroKey is present but no parameter avroKeySchemaFile is present.");
+			throw new IllegalArgumentException(Messages.getString("AVRO_NO_SCHEMA_FILE"));
 		
 		tracer.log(TraceLevel.TRACE, "AvroToJSON operator initialized, ready to receive tuples");
 

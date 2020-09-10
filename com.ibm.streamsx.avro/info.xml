@@ -15,6 +15,10 @@ represented as a Streams `blob` type.
 
 This is an overview of changes for major and minor version upgrades. For details see the Releases in public Github.
 
+++ What is changed in version 1.5.0
+
+* Dependency to third-party libraries updated. Using org.apache.avro:1.10.0 to resolve vulnerability CVE-2020-8840 in jackson-databind-2.9.9.3.jar
+
 ++ What is changed in version 1.4.1 and 1.4.2
 
 * Globalization support: Messages updated
@@ -24,7 +28,7 @@ This is an overview of changes for major and minor version upgrades. For details
 * Globalization support: Error messages externalized
 
 ]]></info:description>
-    <info:version>1.4.2</info:version>
+    <info:version>1.5.0</info:version>
     <info:requiredProductVersion>4.2.0.0</info:requiredProductVersion>
   </info:identity>
   <info:dependencies/>

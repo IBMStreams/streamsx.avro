@@ -48,3 +48,7 @@ Install the latest streamsx package with pip, a package manager for Python, by e
 
     python3 -u -m unittest test_avro.TestICP
 
+## Run the test with CP4D Streams instance and toolkit from build service
+
+    python3 -u -m unittest test_avro.TestICPRemote
+

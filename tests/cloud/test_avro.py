@@ -26,6 +26,7 @@ class Test(unittest.TestCase):
     def setUp(self):
         Tester.setup_distributed(self)
         self.isCloudTest = False
+        self.json_toolkit_location = None
         if os.environ.get('STREAMSX_AVRO_TOOLKIT') is None:
             self.avro_toolkit_location = "../../com.ibm.streamsx.avro"
         else:
@@ -53,7 +54,7 @@ class Test(unittest.TestCase):
         cfg = {}
 
         # change trace level
-        job_config = streamsx.topology.context.JobConfig(tracing='warn')
+        job_config = streamsx.topology.context.JobConfig(tracing='info')
         job_config.add(cfg)
 
         if ("Cloud" not in str(self)):
